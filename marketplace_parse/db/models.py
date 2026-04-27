@@ -4,7 +4,6 @@ from decimal import Decimal
 from sqlalchemy import (
     BigInteger,
     Boolean,
-    CheckConstraint,
     Date,
     DateTime,
     Enum as SAEnum,
@@ -141,16 +140,6 @@ class ParseRun(Base):
 
 class Review(Base):
     __tablename__ = "reviews"
-    __table_args__ = (
-        CheckConstraint("rating IS NULL OR rating BETWEEN 1 AND 5", name="ck_review_rating_range"),
-        Index(
-            "uq_review_external_id",
-            "url_id",
-            "external_id",
-            unique=True,
-            postgresql_where=text("external_id IS NOT NULL"),
-        ),
-    )
 
     review_id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
     url_id: Mapped[int] = mapped_column(
@@ -159,10 +148,7 @@ class Review(Base):
     run_id: Mapped[int | None] = mapped_column(
         BigInteger, ForeignKey("parse_runs.run_id"), nullable=True
     )
-    external_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
     review_text: Mapped[str] = mapped_column(Text, nullable=False)
-    rating: Mapped[int | None] = mapped_column(SmallInteger, nullable=True)
-    author: Mapped[str | None] = mapped_column(String(255), nullable=True)
     review_date: Mapped[date | None] = mapped_column("date", Date, nullable=True)
     sentiment_score: Mapped[float | None] = mapped_column(Float, nullable=True)
     sentiment_label: Mapped[SentimentLabel | None] = mapped_column(
