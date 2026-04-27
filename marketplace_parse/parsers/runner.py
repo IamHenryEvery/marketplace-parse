@@ -4,11 +4,12 @@ from datetime import datetime, timezone
 from marketplace_parse.db.enums import ParseStatus
 from marketplace_parse.db.models import Marketplace, ParseRun, ProductURL, Review
 from marketplace_parse.db.session import async_session_maker
-from marketplace_parse.parsers import yandex_market
+from marketplace_parse.parsers import wildberries, yandex_market
 
 
 PARSERS = {
     "yandex_market": yandex_market.parse,
+    "wildberries": wildberries.parse,
 }
 
 

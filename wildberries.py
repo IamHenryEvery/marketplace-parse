@@ -1,18 +1,14 @@
 import json
-from datetime import date, timedelta
 from pathlib import Path
-
-
+from datetime import date, timedelta
 from playwright.sync_api import Page, sync_playwright
+from playwright_stealth import Stealth
 
-
-# https://market.yandex.ru/cc/9JEhbF аэрогриль
-# https://market.yandex.ru/cc/9JFmGf видеокарта
-# https://market.yandex.ru/cc/9KV93a сковорода
-PRODUCT_URL = "https://market.yandex.ru/cc/9KV93a"
-OUTPUT_PATH = Path(__file__).parent / "reviews.json"
-REVIEW_SELECTOR = 'div[data-baobab-name="review"]'
-
+# https://www.wildberries.ru/catalog/286175495/detail.aspx?targetUrl=SN штаны
+# https://www.wildberries.ru/catalog/684352961/detail.aspx?targetUrl=SN ноут
+PRODUCT_URL = "https://www.wildberries.ru/catalog/684352961/detail.aspx?targetUrl=SN"
+OUTPUT_PATH = Path(__file__).parent / "wb_reviews.json"
+FEEDBACK_SELECTOR = "li.feedback"
 RU_MONTHS = {
     "января": 1, "февраля": 2, "марта": 3, "апреля": 4,
     "мая": 5, "июня": 6, "июля": 7, "августа": 8,
@@ -48,24 +44,28 @@ def parse_date(text: str, *, today: date | None = None) -> date | None:
         year -= 1
     return date(year, month, day)
 
+def wait_for_antibot(page: Page) -> None:
+    page.wait_for_selector("#c_cont", state="detached", timeout=60_000)
+
 
 def open_reviews_page(page: Page) -> None:
-    link = page.locator('a[href*="reviews"]:has-text("отзыв"):has-text("оцен")').first
+    link = page.get_by_role("link", name="Смотреть все отзывы").first
     link.wait_for(state="visible", timeout=15_000)
     link.click()
-    page.wait_for_selector(REVIEW_SELECTOR, timeout=15_000)
+    wait_for_antibot(page)
+    page.wait_for_selector(FEEDBACK_SELECTOR, timeout=30_000)
 
 
 def scroll_until_loaded(page: Page, *, pause_ms: int = 1500, stagnant_limit: int = 3) -> None:
     stagnant = 0
     prev_count = 0
     while True:
-        blocks = page.query_selector_all(REVIEW_SELECTOR)
+        blocks = page.query_selector_all(FEEDBACK_SELECTOR)
         if blocks:
             blocks[-1].scroll_into_view_if_needed()
         page.mouse.wheel(0, 2000)
         page.wait_for_timeout(pause_ms)
-        current = len(page.query_selector_all(REVIEW_SELECTOR))
+        current = len(page.query_selector_all(FEEDBACK_SELECTOR))
         if current == prev_count:
             stagnant += 1
             if stagnant >= stagnant_limit:
@@ -77,35 +77,57 @@ def scroll_until_loaded(page: Page, *, pause_ms: int = 1500, stagnant_limit: int
 
 def extract_reviews(page: Page) -> list[dict]:
     reviews: list[dict] = []
-    for block in page.query_selector_all(REVIEW_SELECTOR):
-        description = block.query_selector('span[data-auto="review-description"]')
-        if description is None:
-            continue
-        texts = [s.inner_text().strip() for s in description.query_selector_all("span")]
-        combined = "; ".join(t for t in texts if t and t[-1] != ':')
+    for block in page.query_selector_all(FEEDBACK_SELECTOR):
+        # review_info = {}
+        fragments: list[str] = []
+        bable_parts: list[str] = []
+        
+        for item in block.query_selector_all("span.feedback__text--item"):
+            text = item.inner_text()
+            if text:
+                fragments.append(text)
+        for bables in block.query_selector_all("div.feedbacks-bables"):
+            title = bables.query_selector("span.feedbacks-bables__title")
+            
+            if title is not None:
+                title_text = title.inner_text().strip() + ':'
+                fragments.append(title_text)
+                
+            for li in bables.query_selector_all("ul.feedbacks-bables__list > li"):
+                li_text = li.inner_text().strip().lower()
+                bable_parts.append(li_text)
+            all_bables = ','.join(bable_parts)
+        combined = "; ".join(fragments)
+        if all_bables:
+            combined += all_bables
         if not combined:
+            # review_info['text'] = combined
             continue
-
-        date_block = block.query_selector('span[data-auto="created-date"]')
-        print(f'date block = {date_block}')
-        raw_date = date_block.inner_text() if date_block else None
+        date_block = block.query_selector('div.feedback__date')
+        raw_date = date_block.inner_text().split(",", 1)[0].strip() if date_block else None
         print(f'raw_date = {raw_date}')
         review_date = parse_date(raw_date) if raw_date else None
         reviews.append({
-            "review_text": combined,
+            "text": combined,
             "date_raw": raw_date,
             "date": review_date.isoformat() if review_date else None,
         })
+            # reviews.append({"text": combined})
     return reviews
 
 
 def main() -> None:
-    with sync_playwright() as pw:
+    with Stealth().use_sync(sync_playwright()) as pw:
         browser = pw.chromium.launch(headless=False, slow_mo=500)
-        context = browser.new_context()
+        context = browser.new_context(
+            locale="ru-RU",
+            timezone_id="Europe/Moscow",
+            viewport={"width": 1280, "height": 800},
+        )
         page = context.new_page()
 
         page.goto(PRODUCT_URL, wait_until="domcontentloaded")
+        wait_for_antibot(page)
         open_reviews_page(page)
         scroll_until_loaded(page)
         reviews = extract_reviews(page)
