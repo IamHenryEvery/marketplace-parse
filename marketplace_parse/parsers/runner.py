@@ -1,10 +1,11 @@
 import asyncio
 from datetime import datetime, timezone
 
-from marketplace_parse.db.enums import ParseStatus
+from marketplace_parse.db.enums import ParseStatus, SentimentLabel
 from marketplace_parse.db.models import Marketplace, ParseRun, ProductURL, Review
 from marketplace_parse.db.session import async_session_maker
 from marketplace_parse.parsers import wildberries, yandex_market
+from marketplace_parse.sentiment.analyzer import analyze as analyze_sentiment
 
 
 PARSERS = {
@@ -46,15 +47,30 @@ async def run_parse(url_id: int) -> int:
             await session.commit()
         raise
 
+    sentiments: list[tuple[SentimentLabel, float] | None]
+    if reviews:
+        try:
+            sentiments = await asyncio.to_thread(
+                analyze_sentiment, [r.review_text for r in reviews]
+            )
+        except Exception:
+            sentiments = [None] * len(reviews)
+    else:
+        sentiments = []
+
     async with async_session_maker() as session:
         finished = datetime.now(timezone.utc)
-        for parsed in reviews:
+        for parsed, sent in zip(reviews, sentiments):
+            label = sent[0] if sent else None
+            score = sent[1] if sent else None
             session.add(
                 Review(
                     url_id=url_id,
                     run_id=run_id,
                     review_text=parsed.review_text,
                     review_date=parsed.review_date,
+                    sentiment_label=label,
+                    sentiment_score=score,
                 )
             )
         run = await session.get(ParseRun, run_id)

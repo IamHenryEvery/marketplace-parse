@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, Request
@@ -7,7 +8,7 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from marketplace_parse.db.enums import UserRole
+from marketplace_parse.db.enums import SentimentLabel, UserRole
 from marketplace_parse.db.models import (
     Marketplace,
     ParseRun,
@@ -18,6 +19,16 @@ from marketplace_parse.db.models import (
 )
 from marketplace_parse.db.session import async_session_maker
 from marketplace_parse.parsers.runner import run_parse
+
+
+@dataclass
+class UrlState:
+    last_run: ParseRun | None
+    review_count: int
+    pos: int
+    neg: int
+    neu: int
+    no_sentiment: int
 
 
 TEMPLATES_DIR = Path(__file__).parent / "templates"
@@ -54,7 +65,7 @@ async def _load_marketplaces(session: AsyncSession) -> list[Marketplace]:
     return list(result.scalars().all())
 
 
-async def _url_states(session: AsyncSession, url_ids: list[int]) -> dict[int, tuple[ParseRun | None, int]]:
+async def _url_states(session: AsyncSession, url_ids: list[int]) -> dict[int, UrlState]:
     if not url_ids:
         return {}
     runs_q = await session.execute(
@@ -67,13 +78,30 @@ async def _url_states(session: AsyncSession, url_ids: list[int]) -> dict[int, tu
         last_run_by_url.setdefault(run.url_id, run)
 
     counts_q = await session.execute(
-        select(Review.url_id, func.count(Review.review_id))
+        select(Review.url_id, Review.sentiment_label, func.count(Review.review_id))
         .where(Review.url_id.in_(url_ids))
-        .group_by(Review.url_id)
+        .group_by(Review.url_id, Review.sentiment_label)
     )
-    counts = {url_id: count for url_id, count in counts_q.all()}
+    by_url: dict[int, dict[SentimentLabel | None, int]] = {}
+    for url_id, label, count in counts_q.all():
+        by_url.setdefault(url_id, {})[label] = count
 
-    return {uid: (last_run_by_url.get(uid), counts.get(uid, 0)) for uid in url_ids}
+    states: dict[int, UrlState] = {}
+    for uid in url_ids:
+        d = by_url.get(uid, {})
+        pos = d.get(SentimentLabel.positive, 0)
+        neg = d.get(SentimentLabel.negative, 0)
+        neu = d.get(SentimentLabel.neutral, 0)
+        none_count = d.get(None, 0)
+        states[uid] = UrlState(
+            last_run=last_run_by_url.get(uid),
+            review_count=pos + neg + neu + none_count,
+            pos=pos,
+            neg=neg,
+            neu=neu,
+            no_sentiment=none_count,
+        )
+    return states
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -148,14 +176,9 @@ async def parse_url(url_id: int, request: Request):
         if url is None:
             raise HTTPException(status_code=404, detail="URL not found.")
         states = await _url_states(session, [url_id])
-        last_run, review_count = states[url_id]
 
     return templates.TemplateResponse(
         request,
         "_url_row.html",
-        {
-            "url": url,
-            "last_run": last_run,
-            "review_count": review_count,
-        },
+        {"url": url, "state": states[url_id]},
     )

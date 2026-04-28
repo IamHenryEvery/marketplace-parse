@@ -4,7 +4,7 @@
   {% if product.urls %}
     <ul class="urls">
       {% for url in product.urls %}
-        {% set last_run, review_count = url_states[url.url_id] %}
+        {% set state = url_states[url.url_id] %}
         {% include "_url_row.html" %}
       {% endfor %}
     </ul>

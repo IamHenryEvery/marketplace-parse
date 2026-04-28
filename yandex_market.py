@@ -6,10 +6,11 @@ from pathlib import Path
 from playwright.sync_api import Page, sync_playwright
 
 
-# https://market.yandex.ru/cc/9JEhbF аэрогриль
+# https://market.yandex.ru/cc/9KxEJM комплект одежды
 # https://market.yandex.ru/cc/9JFmGf видеокарта
 # https://market.yandex.ru/cc/9KV93a сковорода
-PRODUCT_URL = "https://market.yandex.ru/cc/9KV93a"
+# https://market.yandex.ru/cc/9Kwnea покрывало
+PRODUCT_URL = "https://market.yandex.ru/cc/9KxEJM"
 OUTPUT_PATH = Path(__file__).parent / "reviews.json"
 REVIEW_SELECTOR = 'div[data-baobab-name="review"]'
 
@@ -78,6 +79,11 @@ def scroll_until_loaded(page: Page, *, pause_ms: int = 1500, stagnant_limit: int
 def extract_reviews(page: Page) -> list[dict]:
     reviews: list[dict] = []
     for block in page.query_selector_all(REVIEW_SELECTOR):
+        date_block = block.query_selector('div[data-auto="created-date"]')
+        print(f'date block = {date_block}')
+        raw_date = date_block.inner_text() if date_block else None
+        print(f'raw_date = {raw_date}')
+        review_date = parse_date(raw_date) if raw_date else None
         description = block.query_selector('span[data-auto="review-description"]')
         if description is None:
             continue
@@ -85,12 +91,6 @@ def extract_reviews(page: Page) -> list[dict]:
         combined = "; ".join(t for t in texts if t and t[-1] != ':')
         if not combined:
             continue
-
-        date_block = block.query_selector('span[data-auto="created-date"]')
-        print(f'date block = {date_block}')
-        raw_date = date_block.inner_text() if date_block else None
-        print(f'raw_date = {raw_date}')
-        review_date = parse_date(raw_date) if raw_date else None
         reviews.append({
             "review_text": combined,
             "date_raw": raw_date,

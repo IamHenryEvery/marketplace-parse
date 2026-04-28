@@ -63,7 +63,7 @@ def _extract_reviews(page: Page) -> list[ParsedReview]:
         if not combined:
             continue
 
-        date_block = block.query_selector('span[data-auto="created-date"]')
+        date_block = block.query_selector('div[data-auto="created-date"]')
         review_date = parse_date(date_block.inner_text()) if date_block else None
 
         reviews.append(ParsedReview(review_text=combined, review_date=review_date))
