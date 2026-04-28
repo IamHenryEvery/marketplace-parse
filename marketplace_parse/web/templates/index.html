@@ -1,0 +1,33 @@
+{% extends "_base.html" %}
+{% block body %}
+<h1>marketplace-parse</h1>
+
+<section>
+  <h2>Добавить товар</h2>
+  <form hx-post="/products" hx-target="#product-list" hx-swap="outerHTML">
+    <p>
+      <label>Название: <input type="text" name="name" required style="width: 60%;"></label>
+    </p>
+    <fieldset>
+      <legend>Ссылки (заполнить хотя бы одну)</legend>
+      {% for i in range(1, 4) %}
+      <div class="url-row">
+        <input type="url" name="url_{{ i }}" placeholder="https://...">
+        <select name="marketplace_{{ i }}">
+          <option value="">— маркетплейс —</option>
+          {% for mp in marketplaces %}
+          <option value="{{ mp.marketplace_id }}">{{ mp.display_name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      {% endfor %}
+    </fieldset>
+    <button type="submit">Создать</button>
+  </form>
+</section>
+
+<section>
+  <h2>Товары</h2>
+  {% include "_product_list.html" %}
+</section>
+{% endblock %}

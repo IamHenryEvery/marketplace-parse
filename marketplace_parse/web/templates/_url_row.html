@@ -1,0 +1,33 @@
+<li class="url" id="url-{{ url.url_id }}">
+  <div>
+    <code>{{ url.url }}</code>
+    <span class="badge">{{ url.marketplace.display_name }}</span>
+  </div>
+  <div class="meta" style="margin-top: 0.4rem;">
+    {% if last_run %}
+      Последний прогон:
+      <span class="status-{{ last_run.status.value }}"><strong>{{ last_run.status.value }}</strong></span>
+      {% if last_run.finished_at %}
+        — {{ last_run.finished_at.strftime('%Y-%m-%d %H:%M') }}
+      {% elif last_run.started_at %}
+        — начат {{ last_run.started_at.strftime('%Y-%m-%d %H:%M') }}
+      {% endif %}
+      · в БД отзывов: <strong>{{ review_count }}</strong>
+      {% if last_run.error_message %}
+        <pre class="error">{{ last_run.error_message }}</pre>
+      {% endif %}
+    {% else %}
+      <span class="empty">прогонов ещё не было · в БД отзывов: {{ review_count }}</span>
+    {% endif %}
+  </div>
+  <div style="margin-top: 0.5rem;">
+    <button hx-post="/urls/{{ url.url_id }}/parse"
+            hx-target="#url-{{ url.url_id }}"
+            hx-swap="outerHTML"
+            hx-indicator="#spinner-{{ url.url_id }}"
+            hx-disabled-elt="this">
+      Запустить парсинг
+    </button>
+    <span id="spinner-{{ url.url_id }}" class="htmx-indicator">⏳ парсим (откроется окно браузера)…</span>
+  </div>
+</li>
