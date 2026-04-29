@@ -20,6 +20,8 @@ class Settings(BaseSettings):
     rabbitmq_host: str = "localhost"
     rabbitmq_port: int = 5672
 
+    session_secret: str = "dev-secret-change-me"
+
     @property
     def postgres_dsn(self) -> str:
         return (

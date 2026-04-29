@@ -1,8 +1,17 @@
 import asyncio
 from datetime import datetime, timezone
 
+from sqlalchemy import func, select
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from marketplace_parse.db.enums import ParseStatus, SentimentLabel
-from marketplace_parse.db.models import Marketplace, ParseRun, ProductURL, Review
+from marketplace_parse.db.models import (
+    AnalysisResult,
+    Marketplace,
+    ParseRun,
+    ProductURL,
+    Review,
+)
 from marketplace_parse.db.session import async_session_maker
 from marketplace_parse.parsers import wildberries, yandex_market
 from marketplace_parse.sentiment.analyzer import analyze as analyze_sentiment
@@ -80,7 +89,53 @@ async def run_parse(url_id: int) -> int:
 
         product_url = await session.get(ProductURL, url_id)
         product_url.last_parsed_at = finished
+        product_id = product_url.product_id
+        marketplace_id = product_url.marketplace_id
 
         await session.commit()
 
+    async with async_session_maker() as session:
+        await _record_analysis(session, product_id, marketplace_id)
+        await session.commit()
+
     return len(reviews)
+
+
+async def _record_analysis(session: AsyncSession, product_id: int, marketplace_id: int) -> None:
+    """Insert a fresh analysis_result row aggregating reviews across all URLs
+    of (product_id, marketplace_id). History rows are kept; we don't update in place.
+    """
+    url_subq = (
+        select(ProductURL.url_id)
+        .where(ProductURL.product_id == product_id)
+        .where(ProductURL.marketplace_id == marketplace_id)
+        .scalar_subquery()
+    )
+    counts_q = await session.execute(
+        select(Review.sentiment_label, func.count(Review.review_id))
+        .where(Review.url_id.in_(url_subq))
+        .group_by(Review.sentiment_label)
+    )
+    pos = neg = neu = 0
+    for label, count in counts_q.all():
+        if label is SentimentLabel.positive:
+            pos = count
+        elif label is SentimentLabel.negative:
+            neg = count
+        elif label is SentimentLabel.neutral:
+            neu = count
+
+    avg = await session.scalar(
+        select(func.avg(Review.sentiment_score)).where(Review.url_id.in_(url_subq))
+    )
+    session.add(
+        AnalysisResult(
+            product_id=product_id,
+            marketplace_id=marketplace_id,
+            total_reviews=pos + neg + neu,
+            positive_count=pos,
+            negative_count=neg,
+            neutral_count=neu,
+            avg_sentiment=float(avg or 0.0),
+        )
+    )

@@ -1,0 +1,48 @@
+<div class="modal-overlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal-content">
+    <button class="modal-close" type="button" onclick="closeModal()">×</button>
+    <h2>{{ product.name }}</h2>
+    <p class="meta">создан {{ product.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
+
+    <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+      <button hx-get="/products/{{ product.product_id }}/edit"
+              hx-target="#modal"
+              hx-swap="innerHTML">
+        Редактировать
+      </button>
+      <button hx-delete="/products/{{ product.product_id }}"
+              hx-target="#cards"
+              hx-swap="outerHTML"
+              hx-confirm="Удалить «{{ product.name }}» вместе со всеми ссылками и собранными отзывами?"
+              hx-on:htmx:after-request="if(event.detail.successful) closeModal()"
+              style="margin-left: auto; color: #b21f1f;">
+        Удалить
+      </button>
+    </div>
+
+    {% if product.urls %}
+      <ul class="urls">
+        {% for url in product.urls %}
+          <li class="url">
+            <div>
+              <span class="badge">{{ url.marketplace.display_name }}</span>
+              <code>{{ url.url }}</code>
+            </div>
+            <div style="margin-top: 0.5rem;">
+              <button hx-post="/urls/{{ url.url_id }}/parse"
+                      hx-target="#modal"
+                      hx-swap="innerHTML"
+                      hx-disabled-elt="this"
+                      hx-indicator="#spinner-{{ url.url_id }}">
+                Запустить парсинг
+              </button>
+              <span id="spinner-{{ url.url_id }}" class="htmx-indicator">⏳ парсим + анализируем тональность…</span>
+            </div>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="empty">У товара нет ссылок.</p>
+    {% endif %}
+  </div>
+</div>

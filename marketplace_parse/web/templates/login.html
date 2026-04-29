@@ -1,0 +1,18 @@
+{% extends "_base.html" %}
+{% block title %}Вход — marketplace-parse{% endblock %}
+{% block body %}
+<div class="auth-card">
+  <h2>Вход</h2>
+  {% if error %}<div class="form-error">{{ error }}</div>{% endif %}
+  <form method="post" action="/login" class="form-stack">
+    <label>Email
+      <input type="email" name="email" required autofocus>
+    </label>
+    <label>Пароль
+      <input type="password" name="password" required>
+    </label>
+    <button type="submit">Войти</button>
+  </form>
+  <p class="meta">Нет аккаунта? <a href="/register">Зарегистрироваться</a></p>
+</div>
+{% endblock %}
