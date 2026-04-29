@@ -13,13 +13,14 @@ from marketplace_parse.db.models import (
     Review,
 )
 from marketplace_parse.db.session import async_session_maker
-from marketplace_parse.parsers import wildberries, yandex_market
+from marketplace_parse.parsers import megamarket, wildberries, yandex_market
 from marketplace_parse.sentiment.analyzer import analyze as analyze_sentiment
 
 
 PARSERS = {
     "yandex_market": yandex_market.parse,
     "wildberries": wildberries.parse,
+    "megamarket": megamarket.parse,
 }
 
 
