@@ -17,7 +17,7 @@
         <div class="url-row">
           <input type="url" name="url_{{ i }}" placeholder="https://...">
           <select name="marketplace_{{ i }}">
-            <option value="">— маркетплейс —</option>
+            <option value="">Выберите маркетплейс</option>
             {% for mp in marketplaces %}
             <option value="{{ mp.marketplace_id }}">{{ mp.display_name }}</option>
             {% endfor %}

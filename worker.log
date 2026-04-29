@@ -1,0 +1,23 @@
+2026-04-29 13:16:20,315 [INFO] marketplace_parse.worker: connecting to localhost, queue parse.yandex_market
+2026-04-29 13:16:20,371 [INFO] marketplace_parse.worker: waiting for messages on parse.yandex_market (Ctrl-C to stop)
+2026-04-29 13:16:20,373 [INFO] marketplace_parse.worker: processing run_id=999999
+2026-04-29 13:16:20,434 [ERROR] marketplace_parse.worker: run_id=999999 failed: parse_run id=999999 not found
+Traceback (most recent call last):
+  File "C:\Data\Python_programs\marketplace-parse\marketplace_parse\workers\parser.py", line 52, in run_worker
+    count = await execute_parse(run_id)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Data\Python_programs\marketplace-parse\marketplace_parse\parsers\runner.py", line 58, in execute_parse
+    raise ValueError(f"parse_run id={run_id} not found")
+ValueError: parse_run id=999999 not found
+2026-04-29 13:44:32,785 [INFO] marketplace_parse.worker: processing run_id=13
+2026-04-29 13:44:47,391 [INFO] httpx: HTTP Request: HEAD https://huggingface.co/blanchefort/rubert-base-cased-sentiment/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+2026-04-29 13:44:47,392 [WARNING] huggingface_hub.utils._http: Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+2026-04-29 13:44:47,425 [INFO] httpx: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/blanchefort/rubert-base-cased-sentiment/2d4b5fc431489a87ca4e44b842d904058706e8d4/config.json "HTTP/1.1 200 OK"
+Loading weights:   0%|          | 0/201 [00:00<?, ?it/s]Loading weights: 100%|##########| 201/201 [00:00<00:00, 9772.06it/s]
+2026-04-29 13:44:47,728 [INFO] httpx: HTTP Request: GET https://huggingface.co/api/models/blanchefort/rubert-base-cased-sentiment/tree/main/additional_chat_templates?recursive=false&expand=false "HTTP/1.1 404 Not Found"
+2026-04-29 13:44:47,891 [INFO] httpx: HTTP Request: GET https://huggingface.co/api/models/blanchefort/rubert-base-cased-sentiment/tree/main?recursive=true&expand=false "HTTP/1.1 200 OK"
+2026-04-29 13:44:48,122 [INFO] httpx: HTTP Request: GET https://huggingface.co/api/models/blanchefort/rubert-base-cased-sentiment "HTTP/1.1 200 OK"
+2026-04-29 13:44:49,408 [INFO] marketplace_parse.worker: run_id=13 done, 4 reviews
+2026-04-29 14:11:44,189 [INFO] marketplace_parse.worker: processing run_id=17
+2026-04-29 14:12:06,634 [INFO] marketplace_parse.worker: run_id=17 done, 33 reviews

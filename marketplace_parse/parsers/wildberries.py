@@ -10,7 +10,7 @@ FEEDBACK_SELECTOR = "li.feedback"
 def parse(
     url: str,
     *,
-    headless: bool = False,
+    headless: bool = True,
     slow_mo: int = 500,
     pause_ms: int = 1500,
     stagnant_limit: int = 3,

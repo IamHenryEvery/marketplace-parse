@@ -1,0 +1,53 @@
+<div class="modal-overlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal-content"
+       hx-get="/products/{{ product.product_id }}/parse/status"
+       hx-trigger="every 2s"
+       hx-target="#modal"
+       hx-swap="innerHTML">
+    <button class="modal-close" type="button" onclick="closeModal()">×</button>
+    <h2>{{ product.name }} — парсинг</h2>
+
+    <p>
+      Готово: <strong>{{ completed + failed }}</strong> из <strong>{{ total }}</strong>
+      {% if running %} · в работе: {{ running }}{% endif %}
+      {% if pending %} · в очереди: {{ pending }}{% endif %}
+      {% if failed %} · <span class="status-failed">упало: {{ failed }}</span>{% endif %}
+    </p>
+
+    <div style="background:#eee;border-radius:4px;height:8px;overflow:hidden;margin:0.5rem 0 1rem;">
+      <div style="background:#16a34a;height:100%;width:{{ ((completed + failed) * 100 / total) | round(0, 'floor') if total else 0 }}%; transition: width 0.3s;"></div>
+    </div>
+
+    <ul class="urls">
+      {% for url in urls %}
+        {% set run = latest_by_url[url.url_id] %}
+        <li class="url">
+          <div>
+            <span class="badge">{{ url.marketplace.display_name }}</span>
+            <code>{{ url.url }}</code>
+          </div>
+          <div class="meta" style="margin-top: 0.3rem;">
+            {% if run %}
+              <span class="status-{{ run.status.value }}"><strong>{{ run.status.value }}</strong></span>
+              {% if run.finished_at %}
+                · {{ run.finished_at.strftime('%H:%M:%S') }}
+                · {{ run.reviews_collected }} отзывов
+              {% elif run.started_at %}
+                · начат {{ run.started_at.strftime('%H:%M:%S') }}
+              {% endif %}
+              {% if run.error_message %}
+                <pre class="error">{{ run.error_message }}</pre>
+              {% endif %}
+            {% else %}
+              <span class="empty">прогон не найден</span>
+            {% endif %}
+          </div>
+        </li>
+      {% endfor %}
+    </ul>
+
+    <div style="text-align: right; margin-top: 1rem;">
+      <button type="button" onclick="closeModal()">Закрыть (парсинг продолжится в фоне)</button>
+    </div>
+  </div>
+</div>

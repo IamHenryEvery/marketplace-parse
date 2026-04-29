@@ -4,13 +4,14 @@ from pathlib import Path
 
 
 from playwright.sync_api import Page, sync_playwright
+from playwright_stealth import Stealth
 
 
 # https://market.yandex.ru/cc/9KxEJM комплект одежды
 # https://market.yandex.ru/cc/9JFmGf видеокарта
 # https://market.yandex.ru/cc/9KV93a сковорода
 # https://market.yandex.ru/cc/9Kwnea покрывало
-PRODUCT_URL = "https://market.yandex.ru/cc/9KxEJM"
+PRODUCT_URL = "https://market.yandex.ru/cc/9KV93a"
 OUTPUT_PATH = Path(__file__).parent / "reviews.json"
 REVIEW_SELECTOR = 'div[data-baobab-name="review"]'
 
@@ -80,9 +81,9 @@ def extract_reviews(page: Page) -> list[dict]:
     reviews: list[dict] = []
     for block in page.query_selector_all(REVIEW_SELECTOR):
         date_block = block.query_selector('div[data-auto="created-date"]')
-        print(f'date block = {date_block}')
+        # print(f'date block = {date_block}')
         raw_date = date_block.inner_text() if date_block else None
-        print(f'raw_date = {raw_date}')
+        # print(f'raw_date = {raw_date}')
         review_date = parse_date(raw_date) if raw_date else None
         description = block.query_selector('span[data-auto="review-description"]')
         if description is None:
@@ -100,8 +101,8 @@ def extract_reviews(page: Page) -> list[dict]:
 
 
 def main() -> None:
-    with sync_playwright() as pw:
-        browser = pw.chromium.launch(headless=False, slow_mo=500)
+    with Stealth().use_sync(sync_playwright()) as pw:
+        browser = pw.chromium.launch(headless=True, slow_mo=500)
         context = browser.new_context()
         page = context.new_page()
 

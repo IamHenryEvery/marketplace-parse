@@ -1,4 +1,5 @@
 from playwright.sync_api import Page, sync_playwright
+from playwright_stealth import Stealth
 
 from marketplace_parse.parsers.base import ParsedReview, parse_date
 
@@ -9,12 +10,12 @@ REVIEW_SELECTOR = 'div[data-baobab-name="review"]'
 def parse(
     url: str,
     *,
-    headless: bool = False,
+    headless: bool = True,
     slow_mo: int = 500,
     pause_ms: int = 1500,
     stagnant_limit: int = 3,
 ) -> list[ParsedReview]:
-    with sync_playwright() as pw:
+    with Stealth().use_sync(sync_playwright()) as pw:
         browser = pw.chromium.launch(headless=headless, slow_mo=slow_mo)
         try:
             page = browser.new_context().new_page()

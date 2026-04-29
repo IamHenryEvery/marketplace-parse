@@ -9,18 +9,22 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 from starlette.middleware.sessions import SessionMiddleware
 
+from datetime import datetime, timezone
+
 from marketplace_parse.core.config import settings
 from marketplace_parse.core.security import hash_password, verify_password
-from marketplace_parse.db.enums import UserRole
+from marketplace_parse.db.enums import ParseStatus, UserRole
 from marketplace_parse.db.models import (
     AnalysisResult,
     Marketplace,
+    ParseRun,
     Product,
     ProductURL,
     User,
 )
 from marketplace_parse.db.session import async_session_maker
-from marketplace_parse.parsers.runner import run_parse
+from marketplace_parse.mq import publish_parse_task
+from marketplace_parse.parsers.runner import enqueue_parse
 
 
 TEMPLATES_DIR = Path(__file__).parent / "templates"
@@ -339,38 +343,107 @@ async def create_product(request: Request) -> Response:
 
 # ---------- parse + analysis ----------
 
-@app.post("/urls/{url_id}/parse", response_class=HTMLResponse)
-async def parse_url(url_id: int, request: Request) -> Response:
+@app.post("/products/{product_id}/parse", response_class=HTMLResponse)
+async def parse_product(product_id: int, request: Request) -> Response:
     user = await get_current_user(request)
     if (redirect := _require_user_or_redirect(user)) is not None:
         return redirect
 
     async with async_session_maker() as session:
-        owned = await session.scalar(
-            select(ProductURL.url_id)
-            .join(Product, Product.product_id == ProductURL.product_id)
-            .where(ProductURL.url_id == url_id, Product.user_id == user.user_id)
-        )
-        if owned is None:
+        product = await _load_owned_product(session, product_id, user.user_id)
+        if product is None:
             raise HTTPException(status_code=404)
+        url_ids = [u.url_id for u in product.urls]
 
-    try:
-        await run_parse(url_id)
-    except Exception:
-        # error already saved in parse_runs.error_message
-        pass
+    if not url_ids:
+        raise HTTPException(status_code=400, detail="У товара нет ссылок.")
+
+    for url_id in url_ids:
+        run_id: int | None = None
+        try:
+            run_id, slug = await enqueue_parse(url_id)
+            await publish_parse_task(run_id, slug)
+        except Exception as exc:
+            if run_id is not None:
+                async with async_session_maker() as session:
+                    run = await session.get(ParseRun, run_id)
+                    if run is not None and run.status == ParseStatus.pending:
+                        run.status = ParseStatus.failed
+                        run.error_message = f"enqueue failed: {exc!r}"
+                        run.finished_at = datetime.now(timezone.utc)
+                        await session.commit()
 
     async with async_session_maker() as session:
-        url = await session.scalar(
-            select(ProductURL)
-            .where(ProductURL.url_id == url_id)
-            .options(selectinload(ProductURL.product))
-        )
-        product = await _load_owned_product(session, url.product_id, user.user_id)
-        analyses = await _latest_analyses(session, url.product_id)
+        product = await _load_owned_product(session, product_id, user.user_id)
+        progress = await _parse_progress(session, product_id)
 
     return templates.TemplateResponse(
         request,
-        "_analysis_modal.html",
-        {"product": product, "analyses": analyses},
+        "_parse_progress_modal.html",
+        {"product": product, **progress},
     )
+
+
+@app.get("/products/{product_id}/parse/status", response_class=HTMLResponse)
+async def parse_status(product_id: int, request: Request) -> Response:
+    user = await get_current_user(request)
+    if (redirect := _require_user_or_redirect(user)) is not None:
+        return redirect
+
+    async with async_session_maker() as session:
+        product = await _load_owned_product(session, product_id, user.user_id)
+        if product is None:
+            raise HTTPException(status_code=404)
+        progress = await _parse_progress(session, product_id)
+
+        if progress["total"] > 0 and progress["in_flight"] == 0:
+            analyses = await _latest_analyses(session, product_id)
+            return templates.TemplateResponse(
+                request,
+                "_analysis_modal.html",
+                {"product": product, "analyses": analyses},
+            )
+
+    return templates.TemplateResponse(
+        request,
+        "_parse_progress_modal.html",
+        {"product": product, **progress},
+    )
+
+
+async def _parse_progress(session: AsyncSession, product_id: int) -> dict:
+    """Latest parse_run per URL of this product + counts by status."""
+    urls_q = await session.execute(
+        select(ProductURL)
+        .where(ProductURL.product_id == product_id)
+        .options(selectinload(ProductURL.marketplace))
+        .order_by(ProductURL.url_id)
+    )
+    urls = list(urls_q.scalars())
+
+    latest_by_url: dict[int, ParseRun | None] = {}
+    for url in urls:
+        latest = await session.scalar(
+            select(ParseRun)
+            .where(ParseRun.url_id == url.url_id)
+            .order_by(ParseRun.run_id.desc())
+            .limit(1)
+        )
+        latest_by_url[url.url_id] = latest
+
+    pending = sum(1 for r in latest_by_url.values() if r is not None and r.status == ParseStatus.pending)
+    running = sum(1 for r in latest_by_url.values() if r is not None and r.status == ParseStatus.running)
+    completed = sum(1 for r in latest_by_url.values() if r is not None and r.status == ParseStatus.completed)
+    failed = sum(1 for r in latest_by_url.values() if r is not None and r.status == ParseStatus.failed)
+    total = pending + running + completed + failed
+
+    return {
+        "urls": urls,
+        "latest_by_url": latest_by_url,
+        "pending": pending,
+        "running": running,
+        "completed": completed,
+        "failed": failed,
+        "in_flight": pending + running,
+        "total": total,
+    }
