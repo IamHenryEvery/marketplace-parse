@@ -1,0 +1,245 @@
+body {
+  font-family: system-ui, sans-serif;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 1rem;
+  color: #222;
+  background: #fafafa;
+}
+h1 {
+  margin-top: 0;
+}
+a {
+  color: #2058c8;
+}
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid #e5e5e5;
+  margin-bottom: 1.5rem;
+}
+.topbar .spacer {
+  flex: 1;
+}
+.topbar .user-email {
+  color: #555;
+}
+
+button {
+  padding: 0.4rem 0.9rem;
+  cursor: pointer;
+  font: inherit;
+}
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="url"],
+select {
+  padding: 0.4rem 0.55rem;
+  font-size: 0.95rem;
+  box-sizing: border-box;
+}
+
+/* cards */
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1rem;
+}
+.card {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 1rem;
+  background: white;
+  text-align: left;
+  cursor: pointer;
+  min-height: 110px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  transition:
+    box-shadow 0.15s,
+    transform 0.15s;
+}
+.card:hover {
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  transform: translateY(-1px);
+}
+.card h3 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+.card .badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+.badge {
+  display: inline-block;
+  background: #eef;
+  color: #225;
+  padding: 0.1rem 0.5rem;
+  border-radius: 3px;
+  font-size: 0.8rem;
+}
+.card-add {
+  border: 1.5px dashed #bbb;
+  color: #555;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  background: transparent;
+}
+.card-add:hover {
+  border-color: #888;
+  color: #222;
+}
+
+/* modal */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+.modal-content {
+  background: white;
+  border-radius: 10px;
+  padding: 1.5rem 1.75rem;
+  max-width: 720px;
+  width: 92%;
+  max-height: 88vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+}
+.modal-content h2 {
+  margin-top: 0;
+}
+.modal-close {
+  position: absolute;
+  top: 0.45rem;
+  right: 0.7rem;
+  background: none;
+  border: none;
+  font-size: 1.6rem;
+  line-height: 1;
+  color: #777;
+  cursor: pointer;
+}
+.modal-close:hover {
+  color: #222;
+}
+
+/* product modal */
+ul.urls {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+li.url {
+  border-top: 1px solid #eee;
+  padding: 0.7rem 0;
+}
+li.url:first-child {
+  border-top: none;
+}
+li.url code {
+  background: #f4f4f4;
+  padding: 0.1rem 0.3rem;
+  border-radius: 3px;
+  word-break: break-all;
+}
+
+/* create form */
+fieldset {
+  border: 1px solid #ddd;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+}
+.url-row {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.4rem;
+}
+.url-row input[type="url"] {
+  flex: 1;
+}
+
+/* analysis modal */
+.charts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.25rem;
+  margin-top: 1rem;
+}
+.chart-cell {
+  text-align: center;
+}
+.chart-cell h4 {
+  margin: 0 0 0.5rem;
+}
+.chart-canvas-wrapper {
+  width: 100%;
+  max-width: 220px;
+  height: 220px;
+  margin: 0 auto;
+}
+
+/* misc */
+.status-completed {
+  color: #1a7f37;
+}
+.status-failed {
+  color: #b21f1f;
+}
+.status-running,
+.status-pending {
+  color: #b67500;
+}
+.htmx-indicator {
+  display: none;
+  margin-left: 0.5rem;
+  color: #b67500;
+}
+.htmx-request .htmx-indicator {
+  display: inline;
+}
+pre.error {
+  background: #fff4f4;
+  color: #b21f1f;
+  padding: 0.5rem;
+  border-radius: 4px;
+  white-space: pre-wrap;
+  font-size: 0.85rem;
+}
+.empty {
+  color: #888;
+  font-style: italic;
+}
+.meta {
+  color: #777;
+  font-size: 0.85rem;
+}
+.form-stack > * {
+  display: block;
+  margin-bottom: 0.6rem;
+  width: 100%;
+}
+.form-error {
+  color: #b21f1f;
+  margin-bottom: 0.75rem;
+}
+.auth-card {
+  max-width: 380px;
+  margin: 4rem auto;
+  padding: 1.5rem 2rem;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  background: white;
+}

@@ -30,7 +30,7 @@ class ProductCard:
     marketplaces: list[Marketplace]
 
 
-# ---------- auth ----------
+
 
 async def get_current_user(request: Request) -> User | None:
     user_id = request.session.get("user_id")
@@ -46,7 +46,6 @@ def require_user_or_redirect(user: User | None) -> RedirectResponse | None:
     return None
 
 
-# ---------- product loaders ----------
 
 async def load_user_cards(session: AsyncSession, user_id: int) -> list[ProductCard]:
     result = await session.execute(
@@ -87,7 +86,6 @@ async def load_owned_product(
     )
 
 
-# ---------- parsing helpers ----------
 
 async def latest_analyses(
     session: AsyncSession, product_id: int
