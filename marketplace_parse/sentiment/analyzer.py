@@ -36,12 +36,6 @@ def _get_pipeline():
 
 
 def analyze(texts: list[str]) -> list[tuple[SentimentLabel, float]]:
-    """Run sentiment classification on a batch of texts.
-
-    Returns list aligned with input: (label, signed_score). The signed score
-    is in [-1, 1]: positive class → +confidence, negative class → -confidence,
-    neutral → 0.0. Suitable for averaging across reviews.
-    """
     if not texts:
         return []
     pipe = _get_pipeline()

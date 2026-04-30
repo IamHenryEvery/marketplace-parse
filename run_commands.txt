@@ -1,0 +1,4 @@
+uv run uvicorn marketplace_parse.web.app:app --reload
+uv run python -m marketplace_parse.workers.parser --marketplace yandex_market
+uv run python -m marketplace_parse.workers.parser --marketplace wildberries
+uv run python -m marketplace_parse.workers.parser --marketplace megamarket

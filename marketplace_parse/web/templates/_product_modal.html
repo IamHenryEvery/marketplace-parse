@@ -38,7 +38,7 @@
                 hx-indicator="#spinner-product-{{ product.product_id }}">
           Запустить парсинг ({{ product.urls|length }} {{ 'ссылка' if product.urls|length == 1 else 'ссылки' if product.urls|length < 5 else 'ссылок' }})
         </button>
-        <span id="spinner-product-{{ product.product_id }}" class="htmx-indicator">⏳ парсим все ссылки + анализируем тональность, это займёт несколько минут…</span>
+        <span id="spinner-product-{{ product.product_id }}" class="htmx-indicator">парсим все ссылки + анализируем тональность, это займёт несколько минут…</span>
       </div>
     {% else %}
       <p class="empty">У товара нет ссылок — добавьте их через «Редактировать», чтобы запустить парсинг.</p>

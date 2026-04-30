@@ -6,7 +6,11 @@ from marketplace_parse.core.security import hash_password, verify_password
 from marketplace_parse.db.enums import UserRole
 from marketplace_parse.db.models import User
 from marketplace_parse.db.session import async_session_maker
-from marketplace_parse.web.api.deps import templates
+from marketplace_parse.web.api.deps import (
+    get_current_user,
+    require_user_or_redirect,
+    templates,
+)
 
 
 router = APIRouter()
@@ -74,3 +78,15 @@ async def login(request: Request) -> Response:
 async def logout(request: Request) -> Response:
     request.session.clear()
     return RedirectResponse("/login", status_code=303)
+
+
+@router.post("/scheduler/toggle")
+async def toggle_scheduler(request: Request) -> Response:
+    user = await get_current_user(request)
+    if (redirect := require_user_or_redirect(user)) is not None:
+        return redirect
+    async with async_session_maker() as session:
+        u = await session.get(User, user.user_id)
+        u.scheduler_enabled = not u.scheduler_enabled
+        await session.commit()
+    return Response(status_code=204)

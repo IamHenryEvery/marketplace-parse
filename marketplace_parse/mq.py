@@ -1,8 +1,3 @@
-"""RabbitMQ glue: queue naming, publisher, consumer helper.
-
-Each marketplace has its own queue named ``parse.<slug>``. Messages are JSON
-``{"run_id": <int>}``; everything else is fetched from Postgres by the worker.
-"""
 import asyncio
 import json
 
