@@ -1,14 +1,16 @@
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation, Link } from 'react-router-dom'
 import { useMe, useLogout, useToggleScheduler } from '@/hooks'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
-import { LogOut } from 'lucide-react'
+import { LogOut, Shield } from 'lucide-react'
 
 export default function Header() {
   const navigate = useNavigate()
+  const location = useLocation()
   const { data: user } = useMe()
   const logoutMutation = useLogout()
   const toggleSchedulerMutation = useToggleScheduler()
+  const isAdminRoute = location.pathname.startsWith('/admin')
 
   const handleLogout = async () => {
     await logoutMutation.mutateAsync()
@@ -38,6 +40,16 @@ export default function Header() {
           </div>
 
           <span className="text-sm text-muted-foreground">{user?.email}</span>
+
+          {user?.role === 'admin' && (
+            <Link
+              to={isAdminRoute ? '/' : '/admin'}
+              className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <Shield className="h-4 w-4" />
+              {isAdminRoute ? 'К товарам' : 'Админка'}
+            </Link>
+          )}
 
           <button
             onClick={handleLogout}

@@ -3,6 +3,8 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
+from marketplace_parse.db.enums import UserRole
+
 
 # ---------- auth ----------
 
@@ -27,6 +29,23 @@ class UserOut(BaseModel):
 
 class SchedulerToggleResponse(BaseModel):
     scheduler_enabled: bool
+
+
+# ---------- admin ----------
+
+class UserAdminOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    user_id: int
+    email: str
+    role: str
+    is_active: bool
+    scheduler_enabled: bool
+    created_at: datetime
+
+
+class UpdateUserRoleRequest(BaseModel):
+    role: UserRole
 
 
 # ---------- marketplaces ----------

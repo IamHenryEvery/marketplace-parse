@@ -1,0 +1,30 @@
+.venv
+__pycache__
+**/__pycache__
+*.pyc
+*.pyo
+*.pyd
+.git
+.gitignore
+.pytest_cache
+.ruff_cache
+.mypy_cache
+*.log
+
+# Frontend — workers don't need it
+client/
+
+# Standalone scripts and dumps — not part of the worker image
+yandex_market.py
+wildberries.py
+megamarket.py
+reviews.json
+wb_reviews.json
+mm_reviews.json
+
+# Local secrets — provided via env_file at runtime, not baked in
+.env
+
+# IDE
+.vscode
+.idea

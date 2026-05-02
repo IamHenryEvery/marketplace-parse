@@ -9,7 +9,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 
-from marketplace_parse.api import auth, marketplaces, parsing, products
+from marketplace_parse.api import admin, auth, marketplaces, parsing, products
 from marketplace_parse.core.config import settings
 
 
@@ -32,3 +32,4 @@ app.include_router(auth.router, prefix="/api")
 app.include_router(marketplaces.router, prefix="/api")
 app.include_router(products.router, prefix="/api")
 app.include_router(parsing.router, prefix="/api")
+app.include_router(admin.router, prefix="/api")

@@ -1,5 +1,7 @@
 import type {
   User,
+  UserRole,
+  AdminUser,
   Marketplace,
   Product,
   CreateProductPayload,
@@ -146,4 +148,23 @@ export async function toggleScheduler(): Promise<{ scheduler_enabled: boolean }>
   return request<{ scheduler_enabled: boolean }>('/api/scheduler/toggle', {
     method: 'POST',
   })
+}
+
+// Admin
+export async function getAdminUsers(): Promise<AdminUser[]> {
+  return request<AdminUser[]>('/api/admin/users')
+}
+
+export async function updateUserRole(
+  userId: number,
+  role: UserRole
+): Promise<AdminUser> {
+  return request<AdminUser>(`/api/admin/users/${userId}/role`, {
+    method: 'PATCH',
+    body: JSON.stringify({ role }),
+  })
+}
+
+export async function deleteUser(userId: number): Promise<void> {
+  return request<void>(`/api/admin/users/${userId}`, { method: 'DELETE' })
 }

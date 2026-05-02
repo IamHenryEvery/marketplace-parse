@@ -1,3 +1,25 @@
+# x-worker-base: &worker-base
+#   build: .
+#   image: marketplace-parse-worker
+#   restart: unless-stopped
+#   env_file: .env
+#   environment:
+#     # Override host-side .env values: inside the docker network the services
+#     # are reachable by their compose-service names, not localhost.
+#     POSTGRES_HOST: postgres
+#     RABBITMQ_HOST: rabbitmq
+#   volumes:
+#     # Mount the source so code edits don't require an image rebuild.
+#     - ./marketplace_parse:/app/marketplace_parse
+#     # Persist HuggingFace model cache across restarts (~700 MB rubert model).
+#     - hf_cache:/hf-cache
+#   depends_on:
+#     postgres:
+#       condition: service_healthy
+#     rabbitmq:
+#       condition: service_healthy
+#   init: true
+
 services:
   postgres:
     image: postgres:16-alpine
@@ -35,6 +57,27 @@ services:
       timeout: 10s
       retries: 10
 
+  # worker-yandex:
+  #   <<: *worker-base
+  #   container_name: marketplace-worker-yandex
+  #   command: python -m marketplace_parse.workers.parser --marketplace yandex_market
+
+  # worker-wildberries:
+  #   <<: *worker-base
+  #   container_name: marketplace-worker-wildberries
+  #   command: python -m marketplace_parse.workers.parser --marketplace wildberries
+
+  # worker-megamarket:
+  #   <<: *worker-base
+  #   container_name: marketplace-worker-megamarket
+  #   command: python -m marketplace_parse.workers.parser --marketplace megamarket
+
+  # scheduler:
+  #   <<: *worker-base
+  #   container_name: marketplace-scheduler
+  #   command: python -m marketplace_parse.scheduler.runner
+
 volumes:
   postgres_data:
   rabbitmq_data:
+  # hf_cache:

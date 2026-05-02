@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import * as api from './api'
-import type { CreateProductPayload, UpdateProductPayload } from './types'
+import type { CreateProductPayload, UpdateProductPayload, UserRole } from './types'
 
 // Auth hooks
 export function useMe() {
@@ -128,6 +128,36 @@ export function useAnalysis(productId: number, enabled: boolean = true) {
     queryKey: ['analysis', productId],
     queryFn: () => api.getAnalysis(productId),
     enabled,
+  })
+}
+
+// Admin
+export function useAdminUsers() {
+  return useQuery({
+    queryKey: ['admin-users'],
+    queryFn: api.getAdminUsers,
+    staleTime: 0,
+  })
+}
+
+export function useUpdateUserRole() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ userId, role }: { userId: number; role: UserRole }) =>
+      api.updateUserRole(userId, role),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-users'] })
+    },
+  })
+}
+
+export function useDeleteUser() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (userId: number) => api.deleteUser(userId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-users'] })
+    },
   })
 }
 

@@ -1,9 +1,21 @@
 // Auth & User
+export type UserRole = 'user' | 'analyst' | 'admin'
+
 export interface User {
   user_id: number
   email: string
-  role: 'user' | 'analyst' | 'admin'
+  role: UserRole
   scheduler_enabled: boolean
+}
+
+// Admin view of a user — has extra fields the dashboard doesn't need
+export interface AdminUser {
+  user_id: number
+  email: string
+  role: UserRole
+  is_active: boolean
+  scheduler_enabled: boolean
+  created_at: string
 }
 
 // Marketplaces
