@@ -42,12 +42,7 @@ async def enqueue_parse(url_id: int) -> tuple[int, str]:
 
 
 async def execute_parse(run_id: int) -> int:
-    """Execute the parser for an existing parse_run.
 
-    Idempotent: if the run is not in ``pending`` state, returns its current
-    ``reviews_collected`` without doing anything. This handles RabbitMQ
-    at-least-once redelivery.
-    """
     async with async_session_maker() as session:
         run = await session.get(ParseRun, run_id)
         if run is None:
