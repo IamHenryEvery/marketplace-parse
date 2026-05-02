@@ -15,10 +15,13 @@ interface AnalysisModalProps {
   onClose: () => void
 }
 
+// Hex equivalents of the --positive / --neutral / --negative OKLCH values from
+// index.css. Hardcoded because SVG fill doesn't reliably resolve CSS variables
+// across all browsers (Safari especially).
 const COLORS = {
-  positive: '#16a34a',
-  neutral: '#94a3b8',
-  negative: '#dc2626',
+  positive: '#f08035', // brand orange
+  neutral: '#8a8478',  // warm gray
+  negative: '#b13a30', // deep red, distinct from orange
 }
 
 function SentimentChart({ item }: { item: AnalysisItem }) {
