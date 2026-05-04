@@ -24,10 +24,7 @@ async def daily_parse_all_users() -> None:
         users = list(
             (
                 await session.execute(
-                    select(User).where(
-                        User.scheduler_enabled.is_(True),
-                        User.is_active.is_(True),
-                    )
+                    select(User).where(User.scheduler_enabled.is_(True))
                 )
             ).scalars()
         )

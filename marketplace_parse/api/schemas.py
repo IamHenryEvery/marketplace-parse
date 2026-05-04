@@ -39,7 +39,6 @@ class UserAdminOut(BaseModel):
     user_id: int
     email: str
     role: str
-    is_active: bool
     scheduler_enabled: bool
     created_at: datetime
 
@@ -141,3 +140,44 @@ class AnalysisLatest(BaseModel):
 class AnalysisItem(BaseModel):
     marketplace: MarketplaceOut
     latest: AnalysisLatest | None
+
+
+# ---------- parse run history ----------
+
+class ParseRunListItem(BaseModel):
+    run_id: int
+    product_id: int
+    product_name: str
+    url: str
+    marketplace: MarketplaceOut
+    status: str
+    started_at: datetime | None
+    finished_at: datetime | None
+    created_at: datetime
+    reviews_collected: int
+    error_message: str | None
+
+
+class RunAnalysisOut(BaseModel):
+    run_id: int
+    product_name: str
+    marketplace: MarketplaceOut
+    status: str
+    total_reviews: int
+    positive_count: int
+    negative_count: int
+    neutral_count: int
+    avg_sentiment: float
+
+
+# ---------- analytics (analyst+admin) ----------
+
+class FeedReviewItem(BaseModel):
+    review_id: int
+    review_text: str
+    review_date: datetime | None
+    sentiment_label: str | None
+    sentiment_score: float | None
+    created_at: datetime
+    marketplace: MarketplaceOut
+    product_name: str  # anonymized — no user_id / email exposed

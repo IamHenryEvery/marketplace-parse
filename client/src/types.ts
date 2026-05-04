@@ -13,7 +13,6 @@ export interface AdminUser {
   user_id: number
   email: string
   role: UserRole
-  is_active: boolean
   scheduler_enabled: boolean
   created_at: string
 }
@@ -86,4 +85,54 @@ export interface AnalysisItem {
     avg_sentiment: number
     calculated_at: string
   } | null
+}
+
+// Parse run history
+export interface ParseRunListItem {
+  run_id: number
+  product_id: number
+  product_name: string
+  url: string
+  marketplace: Marketplace
+  status: 'pending' | 'running' | 'completed' | 'failed'
+  started_at: string | null
+  finished_at: string | null
+  created_at: string
+  reviews_collected: number
+  error_message: string | null
+}
+
+export interface RunAnalysis {
+  run_id: number
+  product_name: string
+  marketplace: Marketplace
+  status: 'pending' | 'running' | 'completed' | 'failed'
+  total_reviews: number
+  positive_count: number
+  negative_count: number
+  neutral_count: number
+  avg_sentiment: number
+}
+
+// Analytics (analyst+admin)
+export type SentimentLabel = 'positive' | 'neutral' | 'negative'
+
+export interface FeedReviewItem {
+  review_id: number
+  review_text: string
+  review_date: string | null
+  sentiment_label: SentimentLabel | null
+  sentiment_score: number | null
+  created_at: string
+  marketplace: Marketplace
+  product_name: string
+}
+
+export interface FeedFilters {
+  marketplace?: string
+  sentiment?: SentimentLabel
+  from?: string  // YYYY-MM-DD
+  to?: string    // YYYY-MM-DD
+  limit?: number
+  offset?: number
 }

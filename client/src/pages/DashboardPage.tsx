@@ -3,19 +3,29 @@ import { useProducts } from '@/hooks'
 import Header from '@/components/Header'
 import ProductCard from '@/components/ProductCard'
 import AddProductCard from '@/components/AddProductCard'
+import ParseRunsList from '@/components/ParseRunsList'
 import CreateProductModal from '@/components/modals/CreateProductModal'
 import ProductDetailsModal from '@/components/modals/ProductDetailsModal'
 import EditProductModal from '@/components/modals/EditProductModal'
 import ParseProgressModal from '@/components/modals/ParseProgressModal'
 import AnalysisModal from '@/components/modals/AnalysisModal'
-import type { Product } from '@/types'
+import RunAnalysisModal from '@/components/modals/RunAnalysisModal'
+import type { Product, ParseRunListItem } from '@/types'
 
-type ModalType = 'create' | 'details' | 'edit' | 'progress' | 'analysis' | null
+type ModalType =
+  | 'create'
+  | 'details'
+  | 'edit'
+  | 'progress'
+  | 'analysis'
+  | 'run-analysis'
+  | null
 
 export default function DashboardPage() {
   const { data: products = [], isLoading } = useProducts()
   const [modalType, setModalType] = useState<ModalType>(null)
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
+  const [selectedRunId, setSelectedRunId] = useState<number | null>(null)
 
   const openDetails = (product: Product) => {
     setSelectedProduct(product)
@@ -45,6 +55,16 @@ export default function DashboardPage() {
   const closeAndClearProduct = () => {
     setModalType(null)
     setSelectedProduct(null)
+  }
+
+  const openRunAnalysis = (run: ParseRunListItem) => {
+    setSelectedRunId(run.run_id)
+    setModalType('run-analysis')
+  }
+
+  const closeRunAnalysis = () => {
+    setModalType(null)
+    setSelectedRunId(null)
   }
 
   return (
@@ -82,6 +102,14 @@ export default function DashboardPage() {
             <AddProductCard onClick={openCreate} />
           </div>
         )}
+
+        <h2 className="text-xl font-semibold text-foreground mt-12 mb-2">
+          История прогонов
+        </h2>
+        <p className="text-sm text-muted-foreground mb-4">
+          Кликните по строке, чтобы увидеть круговую диаграмму отзывов этого прогона.
+        </p>
+        <ParseRunsList onRunClick={openRunAnalysis} />
       </main>
 
       <CreateProductModal
@@ -119,6 +147,12 @@ export default function DashboardPage() {
           />
         </>
       )}
+
+      <RunAnalysisModal
+        open={modalType === 'run-analysis'}
+        runId={selectedRunId}
+        onClose={closeRunAnalysis}
+      />
     </div>
   )
 }

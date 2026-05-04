@@ -2,7 +2,7 @@ import { useNavigate, useLocation, Link } from 'react-router-dom'
 import { useMe, useLogout, useToggleScheduler } from '@/hooks'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
-import { LogOut, Shield } from 'lucide-react'
+import { BarChart3, LogOut, Shield } from 'lucide-react'
 
 export default function Header() {
   const navigate = useNavigate()
@@ -11,6 +11,8 @@ export default function Header() {
   const logoutMutation = useLogout()
   const toggleSchedulerMutation = useToggleScheduler()
   const isAdminRoute = location.pathname.startsWith('/admin')
+  const isAnalyticsRoute = location.pathname.startsWith('/analytics')
+  const canSeeAnalytics = user?.role === 'analyst' || user?.role === 'admin'
 
   const handleLogout = async () => {
     await logoutMutation.mutateAsync()
@@ -40,6 +42,16 @@ export default function Header() {
           </div>
 
           <span className="text-sm text-muted-foreground">{user?.email}</span>
+
+          {canSeeAnalytics && (
+            <Link
+              to={isAnalyticsRoute ? '/' : '/analytics'}
+              className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <BarChart3 className="h-4 w-4" />
+              {isAnalyticsRoute ? 'К товарам' : 'Аналитика'}
+            </Link>
+          )}
 
           {user?.role === 'admin' && (
             <Link

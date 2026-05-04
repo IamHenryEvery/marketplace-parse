@@ -4,6 +4,7 @@ import LoginPage from '@/pages/LoginPage'
 import RegisterPage from '@/pages/RegisterPage'
 import DashboardPage from '@/pages/DashboardPage'
 import AdminPanelPage from '@/pages/AdminPanelPage'
+import AnalyticsPage from '@/pages/AnalyticsPage'
 
 export default function App() {
   return (
@@ -23,6 +24,14 @@ export default function App() {
         element={
           <ProtectedRoute>
             <AdminPanelPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/analytics"
+        element={
+          <ProtectedRoute>
+            <AnalyticsPage />
           </ProtectedRoute>
         }
       />

@@ -119,7 +119,6 @@ export default function AdminPanelPage() {
                   <th className="px-4 py-2 font-medium">ID</th>
                   <th className="px-4 py-2 font-medium">Email</th>
                   <th className="px-4 py-2 font-medium">Роль</th>
-                  <th className="px-4 py-2 font-medium">Активен</th>
                   <th className="px-4 py-2 font-medium">Создан</th>
                 </tr>
               </thead>
@@ -143,9 +142,6 @@ export default function AdminPanelPage() {
                       {ROLE_LABELS[u.role]}
                     </td>
                     <td className="px-4 py-2 text-muted-foreground">
-                      {u.is_active ? 'да' : 'нет'}
-                    </td>
-                    <td className="px-4 py-2 text-muted-foreground">
                       {new Date(u.created_at).toLocaleString('ru-RU')}
                     </td>
                   </tr>
@@ -153,7 +149,7 @@ export default function AdminPanelPage() {
                 {users.length === 0 && (
                   <tr>
                     <td
-                      colSpan={5}
+                      colSpan={4}
                       className="px-4 py-6 text-center text-muted-foreground"
                     >
                       Пользователей нет.

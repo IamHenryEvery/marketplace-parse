@@ -36,7 +36,6 @@ class User(Base, TimestampMixin):
         nullable=False,
         server_default=UserRole.user.value,
     )
-    is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default=text("true"))
     scheduler_enabled: Mapped[bool] = mapped_column(
         Boolean, nullable=False, server_default=text("false")
     )

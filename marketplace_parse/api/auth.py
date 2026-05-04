@@ -45,8 +45,6 @@ async def login(body: LoginRequest, request: Request) -> UserOut:
         user = await session.scalar(select(User).where(User.email == email))
     if user is None or not verify_password(body.password, user.password_hash):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Неверный email или пароль")
-    if not user.is_active:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Аккаунт деактивирован")
     request.session["user_id"] = user.user_id
     return UserOut.model_validate(user)
 

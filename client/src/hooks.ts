@@ -1,6 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import * as api from './api'
-import type { CreateProductPayload, UpdateProductPayload, UserRole } from './types'
+import type {
+  CreateProductPayload,
+  FeedFilters,
+  UpdateProductPayload,
+  UserRole,
+} from './types'
 
 // Auth hooks
 export function useMe() {
@@ -128,6 +133,33 @@ export function useAnalysis(productId: number, enabled: boolean = true) {
     queryKey: ['analysis', productId],
     queryFn: () => api.getAnalysis(productId),
     enabled,
+  })
+}
+
+// Parse run history
+export function useParseRuns() {
+  return useQuery({
+    queryKey: ['parse-runs'],
+    queryFn: api.getParseRuns,
+    refetchInterval: 5000,
+    staleTime: 0,
+  })
+}
+
+export function useRunAnalysis(runId: number | null) {
+  return useQuery({
+    queryKey: ['run-analysis', runId],
+    queryFn: () => api.getRunAnalysis(runId!),
+    enabled: runId !== null,
+  })
+}
+
+// Analytics (analyst+admin)
+export function useAnalyticsFeed(filters: FeedFilters) {
+  return useQuery({
+    queryKey: ['analytics-feed', filters],
+    queryFn: () => api.getAnalyticsFeed(filters),
+    staleTime: 10_000,
   })
 }
 

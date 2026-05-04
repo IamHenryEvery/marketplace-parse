@@ -8,6 +8,10 @@ import type {
   UpdateProductPayload,
   ProgressResponse,
   AnalysisItem,
+  ParseRunListItem,
+  RunAnalysis,
+  FeedReviewItem,
+  FeedFilters,
 } from './types'
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
@@ -141,6 +145,40 @@ export async function getParseStatus(
 // Analysis
 export async function getAnalysis(productId: number): Promise<AnalysisItem[]> {
   return request<AnalysisItem[]>(`/api/products/${productId}/analysis`)
+}
+
+// Parse run history
+export async function getParseRuns(): Promise<ParseRunListItem[]> {
+  return request<ParseRunListItem[]>('/api/parse-runs')
+}
+
+export async function getRunAnalysis(runId: number): Promise<RunAnalysis> {
+  return request<RunAnalysis>(`/api/parse-runs/${runId}/analysis`)
+}
+
+// Analytics (analyst+admin)
+function buildFeedQuery(filters: FeedFilters): string {
+  const params = new URLSearchParams()
+  if (filters.marketplace) params.set('marketplace', filters.marketplace)
+  if (filters.sentiment) params.set('sentiment', filters.sentiment)
+  if (filters.from) params.set('from', filters.from)
+  if (filters.to) params.set('to', filters.to)
+  if (filters.limit !== undefined) params.set('limit', String(filters.limit))
+  if (filters.offset !== undefined) params.set('offset', String(filters.offset))
+  const qs = params.toString()
+  return qs ? `?${qs}` : ''
+}
+
+export async function getAnalyticsFeed(
+  filters: FeedFilters
+): Promise<FeedReviewItem[]> {
+  return request<FeedReviewItem[]>(`/api/analytics/feed${buildFeedQuery(filters)}`)
+}
+
+export function analyticsExportUrl(filters: FeedFilters): string {
+  // Strip pagination — export ignores it
+  const { limit: _l, offset: _o, ...exportFilters } = filters
+  return `${BASE_URL}/api/analytics/export.csv${buildFeedQuery(exportFilters)}`
 }
 
 // Scheduler

@@ -35,7 +35,7 @@ async def current_user(request: Request) -> User:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Не авторизован")
     async with async_session_maker() as session:
         user = await session.get(User, user_id)
-    if user is None or not user.is_active:
+    if user is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Не авторизован")
     return user
 
