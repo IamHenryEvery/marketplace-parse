@@ -26,7 +26,7 @@ export default function Header() {
   return (
     <header className="border-b border-border bg-card">
       <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
-        <h1 className="text-lg font-semibold text-foreground">marketplace-parse</h1>
+        <h1 className="text-lg font-semibold text-foreground">Анализ отзывов</h1>
 
         <div className="flex items-center gap-6">
           <div className="flex items-center gap-2">
@@ -59,7 +59,7 @@ export default function Header() {
               className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
               <Shield className="h-4 w-4" />
-              {isAdminRoute ? 'К товарам' : 'Админка'}
+              {isAdminRoute ? 'К товарам' : 'Админ-панель'}
             </Link>
           )}
 

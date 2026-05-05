@@ -108,7 +108,7 @@ export default function ProductDetailsModal({
             <Play className="h-4 w-4 mr-2" />
             {parseMutation.isPending
               ? 'Запуск...'
-              : `Запустить парсинг (${urlCount} ${linkWord})`}
+              : 'Запустить парсинг'}
           </Button>
         ) : (
           <p className="text-sm text-muted-foreground text-center py-2">

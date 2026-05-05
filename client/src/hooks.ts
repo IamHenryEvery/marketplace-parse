@@ -7,7 +7,7 @@ import type {
   UserRole,
 } from './types'
 
-// Auth hooks
+
 export function useMe() {
   return useQuery({
     queryKey: ['me'],
@@ -49,7 +49,7 @@ export function useLogout() {
   })
 }
 
-// Marketplaces
+
 export function useMarketplaces() {
   return useQuery({
     queryKey: ['marketplaces'],
@@ -58,7 +58,7 @@ export function useMarketplaces() {
   })
 }
 
-// Products
+
 export function useProducts() {
   return useQuery({
     queryKey: ['products'],
@@ -110,7 +110,7 @@ export function useDeleteProduct() {
   })
 }
 
-// Parsing
+
 export function useStartParsing() {
   return useMutation({
     mutationFn: (productId: number) => api.startParsing(productId),
@@ -127,7 +127,7 @@ export function useParseStatus(productId: number, enabled: boolean = true) {
   })
 }
 
-// Analysis
+
 export function useAnalysis(productId: number, enabled: boolean = true) {
   return useQuery({
     queryKey: ['analysis', productId],
@@ -136,7 +136,7 @@ export function useAnalysis(productId: number, enabled: boolean = true) {
   })
 }
 
-// Parse run history
+
 export function useParseRuns() {
   return useQuery({
     queryKey: ['parse-runs'],
@@ -154,7 +154,7 @@ export function useRunAnalysis(runId: number | null) {
   })
 }
 
-// Analytics (analyst+admin)
+
 export function useAnalyticsFeed(filters: FeedFilters) {
   return useQuery({
     queryKey: ['analytics-feed', filters],
@@ -163,7 +163,7 @@ export function useAnalyticsFeed(filters: FeedFilters) {
   })
 }
 
-// Admin
+
 export function useAdminUsers() {
   return useQuery({
     queryKey: ['admin-users'],
@@ -193,7 +193,7 @@ export function useDeleteUser() {
   })
 }
 
-// Scheduler
+
 export function useToggleScheduler() {
   const queryClient = useQueryClient()
   return useMutation({
