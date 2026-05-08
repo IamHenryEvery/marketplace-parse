@@ -1,0 +1,47 @@
+@startuml
+title Диаграмма комнонентов docker-compose
+skinparam backgroundColor #FFFFFF
+skinparam componentStyle uml2
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam roundcorner 5
+skinparam linetype ortho
+skinparam ranksep 30
+!pragma layout smetana
+
+package "Backend Services" {
+  component "Scheduler" as scheduler #E3F2FD
+  component "RabbitMQ" as rabbitmq #FFF3E0
+  component "PostgreSQL" as postgres #E8F5E9
+
+  package "Marketplace Workers" {
+    component "Base-Image" as iworker #F5F5F5
+
+    component "Worker-Yandex" as wy #FFCDD2
+    component "Worker-Wildberries" as ww #FFCDD2
+    component "Worker-Megamarket" as wm #FFCDD2
+
+    wy -up-> iworker : <<inherits>>
+    ww -up-> iworker : <<inherits>>
+    wm -up-> iworker : <<inherits>>
+  }
+}
+
+scheduler -right-> rabbitmq : 1. Публикация задач
+rabbitmq -down-> wy : 2. Распределение задач
+rabbitmq -down-> ww
+rabbitmq -down-> wm
+
+wy -down-> postgres : 3. Сохранение результатов
+ww -down-> postgres
+wm -down-> postgres
+
+legend right
+  |= Элемент |= Роль в системе |
+  | Scheduler | Генерация и отправка задач по расписанию |
+  | RabbitMQ | Буферизация и балансировка нагрузки между воркерами |
+  | Workers | Изолированная обработка конкретных маркетплейсов |
+  | PostgreSQL | Централизованное хранилище результатов |
+  | Base-Image | Базовый Docker-образ с общей конфигурацией и логикой |
+endlegend
+@enduml

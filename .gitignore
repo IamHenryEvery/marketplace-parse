@@ -13,3 +13,9 @@ wheels/
 .env
 .env.local
 .claude
+
+
+# dev files
+reviews.json
+wb_reviews.json
+mm_reviews.json
