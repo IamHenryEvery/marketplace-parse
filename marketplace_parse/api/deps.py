@@ -1,4 +1,3 @@
-"""Dependencies shared across JSON routers: auth + DB loaders."""
 from fastapi import Depends, HTTPException, Request, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession

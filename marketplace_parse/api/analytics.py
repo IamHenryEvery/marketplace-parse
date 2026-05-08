@@ -1,4 +1,3 @@
-"""Analytics endpoints for analyst + admin: cross-user reviews feed and CSV export."""
 import csv
 import io
 from datetime import date, datetime, timedelta

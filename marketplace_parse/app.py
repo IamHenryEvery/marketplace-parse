@@ -1,10 +1,3 @@
-"""FastAPI application entry point.
-
-Run as:
-    uv run uvicorn marketplace_parse.app:app --reload
-
-Serves a JSON API under /api/* for the React client at ./client/.
-"""
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware

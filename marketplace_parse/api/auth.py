@@ -1,4 +1,3 @@
-"""Auth: register, login, logout, /me, scheduler toggle."""
 from fastapi import APIRouter, HTTPException, Request, status
 from fastapi.responses import Response
 from sqlalchemy import select

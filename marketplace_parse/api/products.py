@@ -1,4 +1,3 @@
-"""Product CRUD: list, create, read, partial-update, delete."""
 from fastapi import APIRouter, HTTPException, status
 from fastapi.responses import Response
 from sqlalchemy.orm import selectinload

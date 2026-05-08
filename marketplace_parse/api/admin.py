@@ -1,4 +1,3 @@
-"""Admin-only endpoints: list users, change role, delete user."""
 from fastapi import APIRouter, HTTPException, status
 from fastapi.responses import Response
 from sqlalchemy import or_, select

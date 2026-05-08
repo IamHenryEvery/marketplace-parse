@@ -17,9 +17,9 @@ interface AnalysisModalProps {
 
 
 const COLORS = {
-  positive: '#06bf0c', // brand orange
-  neutral: '#818285',  // warm gray
-  negative: '#c70404', // deep red, distinct from orange
+  positive: '#06bf0c', 
+  neutral: '#818285',  
+  negative: '#c70404', 
 }
 
 function SentimentChart({ item }: { item: AnalysisItem }) {

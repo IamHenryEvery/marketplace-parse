@@ -1,4 +1,3 @@
-"""Lookup endpoint for the marketplaces dropdown."""
 from fastapi import APIRouter
 from sqlalchemy import select
 

@@ -1,4 +1,3 @@
-"""Pydantic schemas for the JSON API. Both for request bodies and response shapes."""
 from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
@@ -180,4 +179,4 @@ class FeedReviewItem(BaseModel):
     sentiment_score: float | None
     created_at: datetime
     marketplace: MarketplaceOut
-    product_name: str  # anonymized — no user_id / email exposed
+    product_name: str 

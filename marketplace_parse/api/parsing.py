@@ -1,4 +1,3 @@
-"""Parsing endpoints: trigger, status polling, analysis aggregates."""
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, HTTPException, status
