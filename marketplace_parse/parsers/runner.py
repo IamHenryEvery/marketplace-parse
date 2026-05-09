@@ -1,5 +1,5 @@
 import asyncio
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -24,7 +24,9 @@ PARSERS = {
 }
 
 
-async def enqueue_parse(url_id: int) -> tuple[int, str]:
+async def enqueue_parse(
+    url_id: int, *, from_date: date | None = None
+) -> tuple[int, str]:
     async with async_session_maker() as session:
         product_url = await session.get(ProductURL, url_id)
         if product_url is None:
@@ -34,7 +36,11 @@ async def enqueue_parse(url_id: int) -> tuple[int, str]:
             raise ValueError(f"marketplace id={product_url.marketplace_id} not found")
         if marketplace.slug not in PARSERS:
             raise ValueError(f"no parser registered for marketplace slug={marketplace.slug!r}")
-        run = ParseRun(url_id=url_id, status=ParseStatus.pending)
+        run = ParseRun(
+            url_id=url_id,
+            status=ParseStatus.pending,
+            review_from_date=from_date,
+        )
         session.add(run)
         await session.commit()
         await session.refresh(run)
@@ -71,10 +77,11 @@ async def execute_parse(run_id: int) -> int:
         run.started_at = datetime.now(timezone.utc)
         url = product_url.url
         url_id = product_url.url_id
+        from_date = run.review_from_date
         await session.commit()
 
     try:
-        reviews = await asyncio.to_thread(parser, url)
+        reviews = await asyncio.to_thread(parser, url, from_date=from_date)
     except Exception as exc:
         async with async_session_maker() as session:
             run = await session.get(ParseRun, run_id)

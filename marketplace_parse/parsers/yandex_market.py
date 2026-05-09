@@ -1,3 +1,5 @@
+from datetime import date
+
 from playwright.sync_api import Page, sync_playwright
 from playwright_stealth import Stealth
 
@@ -10,6 +12,7 @@ REVIEW_SELECTOR = 'div[data-baobab-name="review"]'
 def parse(
     url: str,
     *,
+    from_date: date | None = None,
     headless: bool = True,
     slow_mo: int = 500,
     pause_ms: int = 1500,
@@ -22,7 +25,7 @@ def parse(
             page.goto(url, wait_until="domcontentloaded")
             _open_reviews_page(page)
             _scroll_until_loaded(page, pause_ms=pause_ms, stagnant_limit=stagnant_limit)
-            return _extract_reviews(page)
+            return _extract_reviews(page, from_date=from_date)
         finally:
             browser.close()
 
@@ -53,7 +56,7 @@ def _scroll_until_loaded(page: Page, *, pause_ms: int, stagnant_limit: int) -> N
         prev_count = current
 
 
-def _extract_reviews(page: Page) -> list[ParsedReview]:
+def _extract_reviews(page: Page, *, from_date: date | None = None) -> list[ParsedReview]:
     reviews: list[ParsedReview] = []
     for block in page.query_selector_all(REVIEW_SELECTOR):
         description = block.query_selector('span[data-auto="review-description"]')
@@ -66,6 +69,9 @@ def _extract_reviews(page: Page) -> list[ParsedReview]:
 
         date_block = block.query_selector('div[data-auto="created-date"]')
         review_date = parse_date(date_block.inner_text()) if date_block else None
+
+        if from_date is not None and review_date is not None and review_date < from_date:
+            continue
 
         reviews.append(ParsedReview(review_text=combined, review_date=review_date))
     return reviews

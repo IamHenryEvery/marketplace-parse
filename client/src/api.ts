@@ -129,10 +129,12 @@ export async function deleteProduct(id: number): Promise<void> {
 
 // Parsing
 export async function startParsing(
-  productId: number
+  productId: number,
+  fromDate?: string | null
 ): Promise<{ run_ids: number[] }> {
   return request<{ run_ids: number[] }>(`/api/products/${productId}/parse`, {
     method: 'POST',
+    body: JSON.stringify({ from_date: fromDate || null }),
   })
 }
 

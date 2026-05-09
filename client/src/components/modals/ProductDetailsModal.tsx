@@ -1,5 +1,6 @@
+import { useState } from 'react'
 import { useDeleteProduct, useStartParsing } from '@/hooks'
-import { pluralize, formatDate } from '@/lib/utils'
+import { formatDate } from '@/lib/utils'
 import type { Product } from '@/types'
 import {
   Modal,
@@ -9,6 +10,8 @@ import {
 } from '@/components/ui/modal'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import { Pencil, Trash2, Play } from 'lucide-react'
 
 interface ProductDetailsModalProps {
@@ -28,6 +31,7 @@ export default function ProductDetailsModal({
 }: ProductDetailsModalProps) {
   const deleteMutation = useDeleteProduct()
   const parseMutation = useStartParsing()
+  const [fromDate, setFromDate] = useState('')
 
   const handleDelete = async () => {
     if (!window.confirm(`Удалить товар "${product.name}"?`)) return
@@ -41,7 +45,10 @@ export default function ProductDetailsModal({
 
   const handleStartParsing = async () => {
     try {
-      await parseMutation.mutateAsync(product.product_id)
+      await parseMutation.mutateAsync({
+        productId: product.product_id,
+        fromDate: fromDate || null,
+      })
       onStartParsing()
     } catch {
       // Error handled silently
@@ -49,7 +56,7 @@ export default function ProductDetailsModal({
   }
 
   const urlCount = product.urls.length
-  const linkWord = pluralize(urlCount, 'ссылка', 'ссылки', 'ссылок')
+
 
   return (
     <Modal open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
@@ -100,16 +107,33 @@ export default function ProductDetailsModal({
         </div>
 
         {urlCount > 0 ? (
-          <Button
-            onClick={handleStartParsing}
-            disabled={parseMutation.isPending}
-            className="w-full"
-          >
-            <Play className="h-4 w-4 mr-2" />
-            {parseMutation.isPending
-              ? 'Запуск...'
-              : 'Запустить парсинг'}
-          </Button>
+          <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="parse-from-date" className="text-sm">
+                Парсить отзывы с даты
+              </Label>
+              <Input
+                id="parse-from-date"
+                type="date"
+                value={fromDate}
+                onChange={(e) => setFromDate(e.target.value)}
+                disabled={parseMutation.isPending}
+              />
+              <p className="text-xs text-muted-foreground">
+                Если не указано — парсятся все отзывы
+              </p>
+            </div>
+            <Button
+              onClick={handleStartParsing}
+              disabled={parseMutation.isPending}
+              className="w-full"
+            >
+              <Play className="h-4 w-4 mr-2" />
+              {parseMutation.isPending
+                ? 'Запуск...'
+                : 'Запустить парсинг'}
+            </Button>
+          </div>
         ) : (
           <p className="text-sm text-muted-foreground text-center py-2">
             {"Добавьте ссылки через 'Редактировать'"}

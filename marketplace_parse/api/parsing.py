@@ -14,6 +14,7 @@ from marketplace_parse.api.schemas import (
     MarketplaceOut,
     ParseRunListItem,
     ParseTriggerOut,
+    ParseTriggerRequest,
     ProgressOut,
     RunAnalysisOut,
 )
@@ -39,7 +40,11 @@ router = APIRouter()
     response_model=ParseTriggerOut,
     status_code=status.HTTP_202_ACCEPTED,
 )
-async def trigger_parse(product_id: int, user: User = CurrentUser) -> ParseTriggerOut:
+async def trigger_parse(
+    product_id: int,
+    body: ParseTriggerRequest | None = None,
+    user: User = CurrentUser,
+) -> ParseTriggerOut:
     async with async_session_maker() as session:
         product = await get_owned_product_or_404(session, product_id, user.user_id)
         url_ids = [u.url_id for u in product.urls]
@@ -47,11 +52,13 @@ async def trigger_parse(product_id: int, user: User = CurrentUser) -> ParseTrigg
     if not url_ids:
         raise HTTPException(status_code=400, detail="У товара нет ссылок")
 
+    from_date = body.from_date if body is not None else None
+
     run_ids: list[int] = []
     for url_id in url_ids:
         run_id: int | None = None
         try:
-            run_id, slug = await enqueue_parse(url_id)
+            run_id, slug = await enqueue_parse(url_id, from_date=from_date)
             await publish_parse_task(run_id, slug)
             run_ids.append(run_id)
         except Exception as exc:

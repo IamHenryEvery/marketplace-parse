@@ -113,7 +113,13 @@ export function useDeleteProduct() {
 
 export function useStartParsing() {
   return useMutation({
-    mutationFn: (productId: number) => api.startParsing(productId),
+    mutationFn: ({
+      productId,
+      fromDate,
+    }: {
+      productId: number
+      fromDate?: string | null
+    }) => api.startParsing(productId, fromDate),
   })
 }
 

@@ -1,3 +1,5 @@
+from datetime import date
+
 from playwright.sync_api import Page, sync_playwright
 from playwright_stealth import Stealth
 
@@ -13,6 +15,7 @@ NEXT_PAGE_SELECTOR = (
 def parse(
     url: str,
     *,
+    from_date: date | None = None,
     headless: bool = True,
     slow_mo: int = 500,
     pause_ms: int = 1500,
@@ -23,7 +26,7 @@ def parse(
             page = browser.new_context().new_page()
             page.goto(url, wait_until="domcontentloaded")
             _open_reviews_page(page)
-            return _collect_all_reviews(page, pause_ms=pause_ms)
+            return _collect_all_reviews(page, pause_ms=pause_ms, from_date=from_date)
         finally:
             browser.close()
 
@@ -46,22 +49,27 @@ def _goto_next_page(page: Page) -> bool:
     return True
 
 
-def _collect_all_reviews(page: Page, *, pause_ms: int) -> list[ParsedReview]:
+def _collect_all_reviews(
+    page: Page, *, pause_ms: int, from_date: date | None = None
+) -> list[ParsedReview]:
     reviews: list[ParsedReview] = []
     while True:
-        reviews.extend(_extract_reviews(page))
+        reviews.extend(_extract_reviews(page, from_date=from_date))
         if not _goto_next_page(page):
             break
         page.wait_for_timeout(pause_ms)
     return reviews
 
 
-def _extract_reviews(page: Page) -> list[ParsedReview]:
+def _extract_reviews(page: Page, *, from_date: date | None = None) -> list[ParsedReview]:
     reviews: list[ParsedReview] = []
     for block in page.query_selector_all(REVIEW_SELECTOR):
         date_block = block.query_selector("time.review-item-header__date")
         raw_date = date_block.inner_text() if date_block else None
         review_date = parse_date(raw_date) if raw_date else None
+
+        if from_date is not None and review_date is not None and review_date < from_date:
+            continue
 
         parts: list[str] = []
         for el in block.query_selector_all("div.review-item__body, div.text-block"):

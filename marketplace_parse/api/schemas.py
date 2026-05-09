@@ -1,11 +1,10 @@
-from datetime import datetime
+from datetime import date, datetime
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 from marketplace_parse.db.enums import UserRole
 
 
-# ---------- auth ----------
 
 class RegisterRequest(BaseModel):
     email: EmailStr
@@ -30,7 +29,6 @@ class SchedulerToggleResponse(BaseModel):
     scheduler_enabled: bool
 
 
-# ---------- admin ----------
 
 class UserAdminOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -46,7 +44,6 @@ class UpdateUserRoleRequest(BaseModel):
     role: UserRole
 
 
-# ---------- marketplaces ----------
 
 class MarketplaceOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -56,7 +53,6 @@ class MarketplaceOut(BaseModel):
     display_name: str
 
 
-# ---------- products ----------
 
 class ProductURLOut(BaseModel):
     url_id: int
@@ -94,7 +90,10 @@ class ProductUpdate(BaseModel):
     urls_add: list[ProductURLCreate] | None = None
 
 
-# ---------- parsing ----------
+
+class ParseTriggerRequest(BaseModel):
+    from_date: date | None = None
+
 
 class ParseTriggerOut(BaseModel):
     run_ids: list[int]
@@ -125,7 +124,6 @@ class ProgressOut(BaseModel):
     runs: list[ParseRunSummary]
 
 
-# ---------- analysis ----------
 
 class AnalysisLatest(BaseModel):
     total_reviews: int
@@ -141,7 +139,6 @@ class AnalysisItem(BaseModel):
     latest: AnalysisLatest | None
 
 
-# ---------- parse run history ----------
 
 class ParseRunListItem(BaseModel):
     run_id: int
@@ -169,7 +166,7 @@ class RunAnalysisOut(BaseModel):
     avg_sentiment: float
 
 
-# ---------- analytics (analyst+admin) ----------
+
 
 class FeedReviewItem(BaseModel):
     review_id: int
