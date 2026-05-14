@@ -10,20 +10,20 @@ skinparam ranksep 30
 !pragma layout smetana
 
 package "Backend Services" {
-  component "Scheduler" as scheduler #E3F2FD
+  component "Scheduler\n<i>scheduler image</i>" as scheduler #E3F2FD
   component "RabbitMQ" as rabbitmq #FFF3E0
   component "PostgreSQL" as postgres #E8F5E9
 
   package "Marketplace Workers" {
-    component "Base-Image" as iworker #F5F5F5
+    component "Worker Base-Image" as iworker #F5F5F5
 
     component "Worker-Yandex" as wy #FFCDD2
     component "Worker-Wildberries" as ww #FFCDD2
     component "Worker-Megamarket" as wm #FFCDD2
 
-    wy -up-> iworker : <<inherits>>
-    ww -up-> iworker : <<inherits>>
-    wm -up-> iworker : <<inherits>>
+    wy -up-> iworker : <<наследует>>
+    ww -up-> iworker : <<наследует>>
+    wm -up-> iworker : <<наследует>>
   }
 }
 
@@ -38,10 +38,10 @@ wm -down-> postgres
 
 legend right
   |= Элемент |= Роль в системе |
-  | Scheduler | Генерация и отправка задач по расписанию |
+  | Scheduler | Генерация и отправка задач по расписанию (свой легкий  образ) |
   | RabbitMQ | Буферизация и балансировка нагрузки между воркерами |
   | Workers | Изолированная обработка конкретных маркетплейсов |
   | PostgreSQL | Централизованное хранилище результатов |
-  | Base-Image | Базовый Docker-образ с общей конфигурацией и логикой |
+  | Worker Base-Image | Тяжёлый Docker-образ для воркеров |
 endlegend
 @enduml

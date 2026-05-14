@@ -65,7 +65,7 @@ async def main() -> None:
     )
     scheduler.start()
     log.info(
-        "Планировщик запущен; Ежедевный прогон стартует в  %02d:%02d %s",
+        "Планировщик запущен; Ежедневный прогон стартует в  %02d:%02d %s",
         CRON_HOUR, CRON_MINUTE, TIMEZONE,
     )
     try:

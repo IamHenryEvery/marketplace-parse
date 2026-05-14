@@ -1,0 +1,46 @@
+@startuml ETL_Concept
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName Arial
+skinparam defaultFontSize 13
+skinparam shadowing false
+skinparam ArrowColor #333333
+skinparam ArrowThickness 1.5
+
+skinparam database {
+    BackgroundColor #FFFFFF
+    BorderColor #000000
+}
+skinparam rectangle {
+    BackgroundColor #FFFFFF
+    BorderColor #000000
+}
+skinparam node {
+    BackgroundColor #FFFFFF
+    BorderColor #000000
+}
+
+left to right direction
+
+
+package "Источники данных" as SRC {
+    database "База\nданных" as DB
+    database "Файлы\n(CSV, JSON)" as FILES
+    database "API /\nвеб-сервисы" as API
+}
+
+rectangle "Трансформация\n(очистка,\nпреобразование)" as T
+database "Хранилище\nданных" as DWH
+
+rectangle "Анализ\n(отчёты, BI)" as A
+node "Пользователи" as U
+
+DB    --> T : Извлечение
+FILES --> T
+API   --> T
+
+T   --> DWH : Загрузка
+DWH --> A   : Анализ
+A   --> U
+
+@enduml

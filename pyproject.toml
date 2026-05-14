@@ -7,21 +7,30 @@ requires-python = ">=3.13"
 dependencies = [
     "aio-pika>=9.6.2",
     "alembic>=1.18.4",
-    "apscheduler>=3.11.2",
     "asyncpg>=0.31.0",
+    "pydantic-settings>=2.14.0",
+    "pydantic[email]>=2.13.3",
+    "sqlalchemy[asyncio]>=2.0.49",
+]
+
+
+[project.optional-dependencies]
+worker = [
+    "playwright-stealth>=2.0.3",
+    "pytest-playwright>=0.7.2",
+    "torch>=2.11.0",
+    "transformers>=5.6.2",
+]
+api = [
     "fastapi>=0.136.1",
     "itsdangerous>=2.2.0",
     "jinja2>=3.1.6",
     "passlib[argon2]>=1.7.4",
-    "playwright-stealth>=2.0.3",
-    "pydantic-settings>=2.14.0",
-    "pydantic[email]>=2.13.3",
-    "pytest-playwright>=0.7.2",
     "python-multipart>=0.0.27",
-    "sqlalchemy[asyncio]>=2.0.49",
-    "torch>=2.11.0",
-    "transformers>=5.6.2",
     "uvicorn[standard]>=0.46.0",
+]
+scheduler = [
+    "apscheduler>=3.11.2",
 ]
 
 [build-system]
@@ -30,3 +39,12 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["marketplace_parse"]
+
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[tool.uv.sources]
+torch = [{ index = "pytorch-cpu" }]

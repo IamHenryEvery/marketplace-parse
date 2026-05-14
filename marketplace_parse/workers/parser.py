@@ -1,13 +1,3 @@
-"""Parser worker: consumes ``parse.<slug>`` queue, executes parse_runs.
-
-Run as:
-    uv run python -m marketplace_parse.workers.parser --marketplace yandex_market
-    uv run python -m marketplace_parse.workers.parser --marketplace wildberries
-
-One worker per marketplace, ``prefetch=1`` so each worker handles exactly one
-parse_run at a time. RabbitMQ is the buffer between web and parsing — the queue
-holds the burst, the worker processes at its own pace.
-"""
 import argparse
 import asyncio
 import json
@@ -18,26 +8,26 @@ import aio_pika
 
 from marketplace_parse.core.config import settings
 from marketplace_parse.mq import queue_name_for
-from marketplace_parse.parsers.runner import PARSERS, execute_parse
+from marketplace_parse.parsers.runner import VALID_SLUGS, execute_parse
 
 
 log = logging.getLogger("marketplace_parse.worker")
 
 
 async def run_worker(marketplace_slug: str) -> None:
-    if marketplace_slug not in PARSERS:
+    if marketplace_slug not in VALID_SLUGS:
         raise SystemExit(
-            f"unknown marketplace slug {marketplace_slug!r}; "
-            f"known: {sorted(PARSERS)}"
+            f"неизвестный slug маркетплейса {marketplace_slug!r}; "
+            f"известные: {sorted(VALID_SLUGS)}"
         )
     qname = queue_name_for(marketplace_slug)
-    log.info("connecting to %s, queue %s", settings.rabbitmq_host, qname)
+    log.info("подключение к %s, очередь %s", settings.rabbitmq_host, qname)
     connection = await aio_pika.connect_robust(settings.rabbitmq_dsn)
     async with connection:
         channel = await connection.channel()
         await channel.set_qos(prefetch_count=1)
         queue = await channel.declare_queue(qname, durable=True)
-        log.info("waiting for messages on %s (Ctrl-C to stop)", qname)
+        log.info("ожидание сообщений в %s (Ctrl-C для остановки)", qname)
         async with queue.iterator() as it:
             async for message in it:
                 async with message.process(requeue=False, ignore_processed=True):
@@ -45,16 +35,14 @@ async def run_worker(marketplace_slug: str) -> None:
                         payload = json.loads(message.body)
                         run_id = int(payload["run_id"])
                     except (ValueError, KeyError, TypeError) as exc:
-                        log.error("bad message body=%r (%s); discarding", message.body, exc)
+                        log.error("некорректное тело сообщения=%r (%s); отбрасываем", message.body, exc)
                         continue
-                    log.info("processing run_id=%s", run_id)
+                    log.info("обработка run_id=%s", run_id)
                     try:
                         count = await execute_parse(run_id)
-                        log.info("run_id=%s done, %d reviews", run_id, count)
+                        log.info("run_id=%s выполнен, отзывов: %d", run_id, count)
                     except Exception as exc:
-                        # execute_parse already wrote the failure to parse_runs.error_message.
-                        # We swallow it here so the message is ack'd and not redelivered.
-                        log.exception("run_id=%s failed: %s", run_id, exc)
+                        log.exception("run_id=%s завершился с ошибкой: %s", run_id, exc)
 
 
 def main() -> None:
@@ -62,7 +50,7 @@ def main() -> None:
     p.add_argument(
         "--marketplace",
         required=True,
-        help=f"marketplace slug; known: {sorted(PARSERS)}",
+        help=f"marketplace slug; known: {sorted(VALID_SLUGS)}",
     )
     p.add_argument("--log-level", default="INFO")
     args = p.parse_args()

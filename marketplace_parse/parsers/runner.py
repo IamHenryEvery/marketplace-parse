@@ -13,15 +13,19 @@ from marketplace_parse.db.models import (
     Review,
 )
 from marketplace_parse.db.session import async_session_maker
-from marketplace_parse.parsers import megamarket, wildberries, yandex_market
-from marketplace_parse.sentiment.analyzer import analyze as analyze_sentiment
 
 
-PARSERS = {
-    "yandex_market": yandex_market.parse,
-    "wildberries": wildberries.parse,
-    "megamarket": megamarket.parse,
-}
+
+VALID_SLUGS = frozenset({"yandex_market", "wildberries", "megamarket"})
+
+
+def _load_parsers() -> dict:
+    from marketplace_parse.parsers import megamarket, wildberries, yandex_market
+    return {
+        "yandex_market": yandex_market.parse,
+        "wildberries": wildberries.parse,
+        "megamarket": megamarket.parse,
+    }
 
 
 async def enqueue_parse(
@@ -34,7 +38,7 @@ async def enqueue_parse(
         marketplace = await session.get(Marketplace, product_url.marketplace_id)
         if marketplace is None:
             raise ValueError(f"marketplace id={product_url.marketplace_id} not found")
-        if marketplace.slug not in PARSERS:
+        if marketplace.slug not in VALID_SLUGS:
             raise ValueError(f"no parser registered for marketplace slug={marketplace.slug!r}")
         run = ParseRun(
             url_id=url_id,
@@ -65,7 +69,7 @@ async def execute_parse(run_id: int) -> int:
             raise ValueError(run.error_message)
 
         marketplace = await session.get(Marketplace, product_url.marketplace_id)
-        parser = PARSERS.get(marketplace.slug) if marketplace else None
+        parser = _load_parsers().get(marketplace.slug) if marketplace else None
         if parser is None:
             run.status = ParseStatus.failed
             run.finished_at = datetime.now(timezone.utc)
@@ -93,6 +97,7 @@ async def execute_parse(run_id: int) -> int:
 
     sentiments: list[tuple[SentimentLabel, float] | None]
     if reviews:
+        from marketplace_parse.sentiment.analyzer import analyze as analyze_sentiment
         try:
             sentiments = await asyncio.to_thread(
                 analyze_sentiment, [r.review_text for r in reviews]
