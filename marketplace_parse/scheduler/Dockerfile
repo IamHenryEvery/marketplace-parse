@@ -17,11 +17,11 @@ WORKDIR /app
 
 # Layer 1: dependencies only — cached separately from source.
 COPY pyproject.toml uv.lock README.md ./
-RUN uv sync --frozen --no-install-project --extra scheduler
+RUN uv sync --frozen --no-dev --no-install-project --extra scheduler
 
 # Layer 2: project source — overlaid by a bind-mount in dev.
 COPY marketplace_parse ./marketplace_parse
 COPY alembic.ini ./
-RUN uv sync --frozen --extra scheduler
+RUN uv sync --frozen --no-dev --extra scheduler
 
 CMD ["python", "-m", "marketplace_parse.scheduler.runner"]

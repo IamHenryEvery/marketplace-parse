@@ -37,7 +37,7 @@ WORKDIR /app
 # --extra worker pulls playwright-stealth + torch + transformers; api extra is
 # included so this image can also run uvicorn if needed.
 COPY pyproject.toml uv.lock README.md ./
-RUN uv sync --frozen --no-install-project --extra worker --extra api
+RUN uv sync --frozen --no-dev --no-install-project --extra worker --extra api
 
 # Layer 2: Playwright Chromium browser binary (system libs already installed).
 # --no-sync prevents `uv run` from re-syncing/installing the project here:
@@ -47,7 +47,7 @@ RUN uv run --no-sync playwright install chromium
 # Layer 3: project source — overlaid by a bind-mount in dev.
 COPY marketplace_parse ./marketplace_parse
 COPY alembic.ini ./
-RUN uv sync --frozen --extra worker --extra api
+RUN uv sync --frozen --no-dev --extra worker --extra api
 
 # Default: yandex worker. Each compose service overrides this.
 CMD ["python", "-m", "marketplace_parse.workers.parser", "--marketplace", "yandex_market"]
