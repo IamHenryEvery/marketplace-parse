@@ -36,7 +36,7 @@ export default function AnalyticsPage() {
   const { data: me, isLoading: meLoading } = useMe()
   const { data: marketplaces = [] } = useMarketplaces()
 
-  // Filter state — empty string means "all". Local-only until "Применить".
+  
   const [marketplace, setMarketplace] = useState<string>('')
   const [sentiment, setSentiment] = useState<string>('')
   const [dateFrom, setDateFrom] = useState<string>('')

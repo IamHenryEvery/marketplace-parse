@@ -67,7 +67,7 @@ async function request<T>(
   return data as T
 }
 
-// Auth
+
 export async function register(email: string, password: string): Promise<User> {
   return request<User>('/api/auth/register', {
     method: 'POST',
@@ -90,12 +90,12 @@ export async function getMe(): Promise<User> {
   return request<User>('/api/me')
 }
 
-// Marketplaces
+
 export async function getMarketplaces(): Promise<Marketplace[]> {
   return request<Marketplace[]>('/api/marketplaces')
 }
 
-// Products
+
 export async function getProducts(): Promise<Product[]> {
   return request<Product[]>('/api/products')
 }
@@ -127,7 +127,7 @@ export async function deleteProduct(id: number): Promise<void> {
   return request<void>(`/api/products/${id}`, { method: 'DELETE' })
 }
 
-// Parsing
+
 export async function startParsing(
   productId: number,
   fromDate?: string | null
@@ -144,12 +144,12 @@ export async function getParseStatus(
   return request<ProgressResponse>(`/api/products/${productId}/parse/status`)
 }
 
-// Analysis
+
 export async function getAnalysis(productId: number): Promise<AnalysisItem[]> {
   return request<AnalysisItem[]>(`/api/products/${productId}/analysis`)
 }
 
-// Parse run history
+
 export async function getParseRuns(): Promise<ParseRunListItem[]> {
   return request<ParseRunListItem[]>('/api/parse-runs')
 }
@@ -158,7 +158,7 @@ export async function getRunAnalysis(runId: number): Promise<RunAnalysis> {
   return request<RunAnalysis>(`/api/parse-runs/${runId}/analysis`)
 }
 
-// Analytics (analyst+admin)
+
 function buildFeedQuery(filters: FeedFilters): string {
   const params = new URLSearchParams()
   if (filters.marketplace) params.set('marketplace', filters.marketplace)
@@ -178,19 +178,19 @@ export async function getAnalyticsFeed(
 }
 
 export function analyticsExportUrl(filters: FeedFilters): string {
-  // Strip pagination — export ignores it
+  
   const { limit: _l, offset: _o, ...exportFilters } = filters
   return `${BASE_URL}/api/analytics/export.csv${buildFeedQuery(exportFilters)}`
 }
 
-// Scheduler
+
 export async function toggleScheduler(): Promise<{ scheduler_enabled: boolean }> {
   return request<{ scheduler_enabled: boolean }>('/api/scheduler/toggle', {
     method: 'POST',
   })
 }
 
-// Admin
+
 export async function getAdminUsers(): Promise<AdminUser[]> {
   return request<AdminUser[]>('/api/admin/users')
 }

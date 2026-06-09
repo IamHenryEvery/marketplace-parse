@@ -8,7 +8,6 @@ export interface User {
   scheduler_enabled: boolean
 }
 
-// Admin view of a user — has extra fields the dashboard doesn't need
 export interface AdminUser {
   user_id: number
   email: string
@@ -17,14 +16,14 @@ export interface AdminUser {
   created_at: string
 }
 
-// Marketplaces
+
 export interface Marketplace {
   marketplace_id: number
   slug: string
   display_name: string
 }
 
-// Products
+
 export interface ProductURL {
   url_id: number
   url: string
@@ -50,7 +49,7 @@ export interface UpdateProductPayload {
   urls_add?: { url: string; marketplace_id: number }[]
 }
 
-// Parsing
+
 export interface ParseRunSummary {
   url_id: number
   url: string
@@ -74,7 +73,7 @@ export interface ProgressResponse {
   runs: ParseRunSummary[]
 }
 
-// Analysis
+
 export interface AnalysisItem {
   marketplace: Marketplace
   latest: {
@@ -87,7 +86,7 @@ export interface AnalysisItem {
   } | null
 }
 
-// Parse run history
+
 export interface ParseRunListItem {
   run_id: number
   product_id: number
@@ -114,7 +113,7 @@ export interface RunAnalysis {
   avg_sentiment: number
 }
 
-// Analytics (analyst+admin)
+
 export type SentimentLabel = 'positive' | 'neutral' | 'negative'
 
 export interface FeedReviewItem {
@@ -131,8 +130,8 @@ export interface FeedReviewItem {
 export interface FeedFilters {
   marketplace?: string
   sentiment?: SentimentLabel
-  from?: string  // YYYY-MM-DD
-  to?: string    // YYYY-MM-DD
+  from?: string  
+  to?: string    
   limit?: number
   offset?: number
 }

@@ -4,29 +4,29 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* Black & orange dark palette (user-specified greys: bg=#424242, surfaces=#212121) */
-  --background: #1a1a1a;                    /* main "black" */
-  --foreground: oklch(0.97 0.01 60);        /* off-white, slight warmth */
-  --card: #212121;                          /* darker recessed surface */
+  
+  --background: #1a1a1a;                    
+  --foreground: oklch(0.97 0.01 60);        
+  --card: #212121;                          
   --card-foreground: oklch(0.97 0.01 60);
   --popover: #212121;
   --popover-foreground: oklch(0.97 0.01 60);
-  --primary: oklch(0.72 0.18 50);           /* vivid orange */
-  --primary-foreground: #212121;            /* dark text on orange */
+  --primary: oklch(0.72 0.18 50);           
+  --primary-foreground: #212121;            
   --secondary: #212121;
   --secondary-foreground: oklch(0.95 0.04 60);
   --muted: #212121;
-  --muted-foreground: oklch(0.7 0.01 60);   /* mid-light gray with hint of warmth */
-  --accent: oklch(0.42 0.09 50);            /* dark orange tint for hover */
+  --muted-foreground: oklch(0.7 0.01 60);   
+  --accent: oklch(0.42 0.09 50);            
   --accent-foreground: oklch(0.97 0.01 60);
-  --destructive: oklch(0.58 0.22 25);       /* red, distinct from orange */
+  --destructive: oklch(0.58 0.22 25);       
   --destructive-foreground: oklch(0.97 0.01 60);
-  --border: oklch(0.34 0 0);                /* subtle line that reads on both #424242 and #212121 */
+  --border: oklch(0.34 0 0);                
   --input: oklch(0.34 0 0);
-  --ring: oklch(0.72 0.18 50);              /* orange focus ring */
+  --ring: oklch(0.72 0.18 50);              
   --radius: 0.5rem;
 
-  /* Chart palette — original semantic colours (green / slate-gray / red) */
+  
   --positive: oklch(0.55 0.18 145);
   --neutral: oklch(0.65 0.02 250);
   --negative: oklch(0.55 0.22 25);

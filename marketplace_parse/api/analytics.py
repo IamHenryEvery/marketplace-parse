@@ -49,7 +49,6 @@ def _build_filtered_select(
     if date_from is not None:
         stmt = stmt.where(Review.created_at >= datetime.combine(date_from, datetime.min.time()))
     if date_to is not None:
-        # `to` is inclusive at day-level — extend to start of next day
         stmt = stmt.where(
             Review.created_at < datetime.combine(date_to + timedelta(days=1), datetime.min.time())
         )

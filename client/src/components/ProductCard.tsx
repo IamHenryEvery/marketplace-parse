@@ -7,7 +7,6 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product, onClick }: ProductCardProps) {
-  // Get unique marketplaces
   const uniqueMarketplaces = Array.from(
     new Map(product.urls.map((u) => [u.marketplace.marketplace_id, u.marketplace])).values()
   )

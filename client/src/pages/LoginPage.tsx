@@ -17,7 +17,7 @@ export default function LoginPage() {
       await loginMutation.mutateAsync({ email, password })
       navigate('/')
     } catch {
-      // Error handled by mutation state
+      
     }
   }
 

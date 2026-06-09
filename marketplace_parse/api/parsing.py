@@ -99,7 +99,6 @@ async def list_user_parse_runs(user: User = CurrentUser) -> list[ParseRunListIte
             .join(Marketplace, Marketplace.marketplace_id == ProductURL.marketplace_id)
             .where(Product.user_id == user.user_id)
             .order_by(
-                # COALESCE so pending runs (no started_at yet) sort by their created_at.
                 func.coalesce(ParseRun.started_at, ParseRun.created_at).desc()
             )
         )

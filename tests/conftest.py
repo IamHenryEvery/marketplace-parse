@@ -22,7 +22,6 @@ from marketplace_parse.db.session import async_session_maker, engine
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
-# Reference data seeded by alembic; kept across tests to avoid re-seeding.
 EXCLUDED_FROM_TRUNCATE = {"marketplaces"}
 
 
@@ -52,8 +51,6 @@ _MARKETPLACE_SEEDS = [
 
 
 async def _seed_marketplaces() -> None:
-    # asyncpg directly (not the global SQLAlchemy engine): touching `engine`
-    # here would bind its pool to this throwaway loop, breaking later tests.
     dsn = (
         f"postgresql://{settings.postgres_user}:{settings.postgres_password}"
         f"@{settings.postgres_host}:{settings.postgres_port}/{settings.postgres_db}"

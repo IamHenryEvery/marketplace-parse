@@ -71,8 +71,6 @@ async def delete_user(user_id: int, user: User = CurrentUser) -> Response:
         if target is None:
             raise HTTPException(status_code=404, detail="Пользователь не найден")
 
-        # role_change_audit references users via FKs without ON DELETE CASCADE,
-        # so wipe related rows manually before removing the user.
         audit_q = await session.execute(
             select(RoleChangeAudit).where(
                 or_(

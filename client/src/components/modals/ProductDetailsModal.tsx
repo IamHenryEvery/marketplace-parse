@@ -39,7 +39,6 @@ export default function ProductDetailsModal({
       await deleteMutation.mutateAsync(product.product_id)
       onClose()
     } catch {
-      // Error handled silently
     }
   }
 
@@ -51,7 +50,6 @@ export default function ProductDetailsModal({
       })
       onStartParsing()
     } catch {
-      // Error handled silently
     }
   }
 

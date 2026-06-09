@@ -92,7 +92,6 @@ export default function EditProductModal({ open, product, onClose }: EditProduct
       name: name.trim(),
     }
 
-    // urls_update: only those that changed
     const urlsUpdate = existingUrls
       .filter(
         (row) =>
@@ -111,13 +110,11 @@ export default function EditProductModal({ open, product, onClose }: EditProduct
       payload.urls_update = urlsUpdate
     }
 
-    // urls_delete
     const urlsDelete = existingUrls.filter((row) => row.toDelete).map((row) => row.url_id)
     if (urlsDelete.length > 0) {
       payload.urls_delete = urlsDelete
     }
 
-    // urls_add
     const urlsAdd = newUrls
       .filter((row) => row.url.trim() && row.marketplace_id)
       .map((row) => ({

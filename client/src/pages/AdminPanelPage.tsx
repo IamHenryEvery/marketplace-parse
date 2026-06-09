@@ -31,7 +31,7 @@ export default function AdminPanelPage() {
   const [menu, setMenu] = useState<Menu | null>(null)
   const menuRef = useRef<HTMLDivElement | null>(null)
 
-  // Close menu on outside click / Esc / scroll
+  
   useEffect(() => {
     if (!menu) return
     const onDown = (e: MouseEvent) => {

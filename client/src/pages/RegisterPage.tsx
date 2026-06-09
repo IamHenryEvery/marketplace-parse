@@ -17,7 +17,7 @@ export default function RegisterPage() {
       await registerMutation.mutateAsync({ email, password })
       navigate('/')
     } catch {
-      // Error handled by mutation state
+      
     }
   }
 
